@@ -6,6 +6,7 @@ import { OtherFundItem, PlatformRecord, YearData } from './types/investment';
 import { INITIAL_YEARS_DATA, MONTH_NAMES_ES } from './data/initialData';
 import { getAllFlattenedMonths } from './utils/calculations';
 
+// Application state key for durable local storage
 const STORAGE_KEY = 'mis_inversiones_app_data_v1';
 
 export default function App() {
