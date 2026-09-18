@@ -20,7 +20,6 @@ import {
   Copy,
   Check,
   RefreshCw,
-  Lock,
 } from 'lucide-react';
 import { UserAccount, YearData } from '../types/investment';
 import { calculateGlobalMetrics, formatEuro } from '../utils/calculations';
@@ -378,99 +377,85 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* 4 Official Metrics Ribbon (Strictly calculated on the Latest Closed Month) */}
-        <div className="py-2.5 border-t border-white/10">
-          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2">
-            {/* Context Badge: Latest Closed Month */}
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium shrink-0">
-              <span className="inline-flex items-center gap-1 rounded-md bg-purple-950/80 border border-purple-800/60 px-2 py-0.5 text-[10px] font-semibold text-purple-300">
-                <Lock className="h-2.5 w-2.5 text-purple-400" />
-                <span>Último mes cerrado:</span>
-                <span className="text-white font-bold">
-                  {globalMetrics.lastClosedMonth?.fullLabel || 'Agosto 2026'}
+        {/* 4 Official Executive Metrics (Calculated on the Latest Closed Month) */}
+        <div className="py-2 sm:py-2.5 border-t border-white/10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5 lg:gap-3 w-full">
+            {/* 1. Patrimonio */}
+            <div className="flex items-center gap-2 sm:gap-2.5 rounded-xl border border-white/10 bg-slate-900/85 px-2.5 sm:px-3.5 py-2 shadow-lg backdrop-blur-xl ring-1 ring-purple-500/15">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-purple-950/80 border border-purple-800/60 text-purple-400">
+                <Wallet className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-400 truncate">
+                  Patrimonio
                 </span>
-              </span>
+                <span className="block text-xs sm:text-sm font-bold text-white font-mono truncate">
+                  {formatEuro(globalMetrics.currentGlobalNetWorth)}
+                </span>
+              </div>
             </div>
 
-            {/* 4 Metric Pills Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 flex-1 max-w-4xl lg:ml-4">
-              {/* 1. Patrimonio */}
-              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-slate-900/80 px-2.5 sm:px-3 py-1.5 shadow-md backdrop-blur-md ring-1 ring-purple-500/10">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-950/80 border border-purple-800/60 text-purple-400">
-                  <Wallet className="h-3.5 w-3.5" />
-                </div>
-                <div className="min-w-0">
-                  <span className="block text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-400 truncate">
-                    Patrimonio
-                  </span>
-                  <span className="block text-xs sm:text-sm font-bold text-white font-mono truncate">
-                    {formatEuro(globalMetrics.currentGlobalNetWorth)}
-                  </span>
-                </div>
+            {/* 2. Capital Invertido */}
+            <div className="flex items-center gap-2 sm:gap-2.5 rounded-xl border border-white/10 bg-slate-900/85 px-2.5 sm:px-3.5 py-2 shadow-lg backdrop-blur-xl ring-1 ring-blue-500/15">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-blue-950/80 border border-blue-800/60 text-blue-400">
+                <PiggyBank className="h-4 w-4" />
               </div>
-
-              {/* 2. Capital Invertido */}
-              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-slate-900/80 px-2.5 sm:px-3 py-1.5 shadow-md backdrop-blur-md ring-1 ring-blue-500/10">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-950/80 border border-blue-800/60 text-blue-400">
-                  <PiggyBank className="h-3.5 w-3.5" />
-                </div>
-                <div className="min-w-0">
-                  <span className="block text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-400 truncate">
-                    Capital Invertido
-                  </span>
-                  <span className="block text-xs sm:text-sm font-bold text-blue-200 font-mono truncate">
-                    {formatEuro(globalMetrics.currentInvested)}
-                  </span>
-                </div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-400 truncate">
+                  Capital Invertido
+                </span>
+                <span className="block text-xs sm:text-sm font-bold text-blue-200 font-mono truncate">
+                  {formatEuro(globalMetrics.currentInvested)}
+                </span>
               </div>
+            </div>
 
-              {/* 3. Valoración de la Inversión */}
-              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-slate-900/80 px-2.5 sm:px-3 py-1.5 shadow-md backdrop-blur-md ring-1 ring-indigo-500/10">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-950/80 border border-indigo-800/60 text-indigo-400">
-                  <TrendingUp className="h-3.5 w-3.5" />
-                </div>
-                <div className="min-w-0">
-                  <span className="block text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-400 truncate">
-                    Valoración Inversión
-                  </span>
-                  <span className="block text-xs sm:text-sm font-bold text-indigo-200 font-mono truncate">
-                    {formatEuro(globalMetrics.currentValuation)}
-                  </span>
-                </div>
+            {/* 3. Valoración de la Inversión */}
+            <div className="flex items-center gap-2 sm:gap-2.5 rounded-xl border border-white/10 bg-slate-900/85 px-2.5 sm:px-3.5 py-2 shadow-lg backdrop-blur-xl ring-1 ring-indigo-500/15">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-950/80 border border-indigo-800/60 text-indigo-400">
+                <TrendingUp className="h-4 w-4" />
               </div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-400 truncate">
+                  Valoración Inversión
+                </span>
+                <span className="block text-xs sm:text-sm font-bold text-indigo-200 font-mono truncate">
+                  {formatEuro(globalMetrics.currentValuation)}
+                </span>
+              </div>
+            </div>
 
-              {/* 4. Rentabilidad */}
+            {/* 4. Rentabilidad */}
+            <div
+              className={`flex items-center gap-2 sm:gap-2.5 rounded-xl border border-white/10 bg-slate-900/85 px-2.5 sm:px-3.5 py-2 shadow-lg backdrop-blur-xl ${
+                globalMetrics.totalProfit >= 0 ? 'ring-1 ring-emerald-500/20' : 'ring-1 ring-rose-500/20'
+              }`}
+            >
               <div
-                className={`flex items-center gap-2 rounded-xl border border-white/10 bg-slate-900/80 px-2.5 sm:px-3 py-1.5 shadow-md backdrop-blur-md ${
-                  globalMetrics.totalProfit >= 0 ? 'ring-1 ring-emerald-500/20' : 'ring-1 ring-rose-500/20'
+                className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg border ${
+                  globalMetrics.totalProfit >= 0
+                    ? 'bg-emerald-950/80 border-emerald-800/60 text-emerald-400'
+                    : 'bg-rose-950/80 border-rose-800/60 text-rose-400'
                 }`}
               >
-                <div
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border ${
-                    globalMetrics.totalProfit >= 0
-                      ? 'bg-emerald-950/80 border-emerald-800/60 text-emerald-400'
-                      : 'bg-rose-950/80 border-rose-800/60 text-rose-400'
+                {globalMetrics.totalProfit >= 0 ? (
+                  <ArrowUpRight className="h-4 w-4" />
+                ) : (
+                  <ArrowDownRight className="h-4 w-4" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-400 truncate">
+                  Rentabilidad
+                </span>
+                <span
+                  className={`block text-xs sm:text-sm font-bold font-mono truncate ${
+                    globalMetrics.totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'
                   }`}
                 >
-                  {globalMetrics.totalProfit >= 0 ? (
-                    <ArrowUpRight className="h-3.5 w-3.5" />
-                  ) : (
-                    <ArrowDownRight className="h-3.5 w-3.5" />
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <span className="block text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-400 truncate">
-                    Rentabilidad
-                  </span>
-                  <span
-                    className={`block text-xs sm:text-sm font-bold font-mono truncate ${
-                      globalMetrics.totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'
-                    }`}
-                  >
-                    {globalMetrics.totalProfit >= 0 ? '+' : ''}
-                    {formatEuro(globalMetrics.totalProfit)} ({globalMetrics.totalProfitPercentage.toFixed(1)}%)
-                  </span>
-                </div>
+                  {globalMetrics.totalProfit >= 0 ? '+' : ''}
+                  {formatEuro(globalMetrics.totalProfit)} ({globalMetrics.totalProfitPercentage.toFixed(1)}%)
+                </span>
               </div>
             </div>
           </div>
