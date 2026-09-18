@@ -17,7 +17,7 @@ import {
   Copy,
   Check,
 } from 'lucide-react';
-import { CloudAccount, YearData } from '../types/investment';
+import { UserAccount, YearData } from '../types/investment';
 import { calculateGlobalMetrics, formatEuro } from '../utils/calculations';
 import { exportJSONFile, exportCSVFile, copyJSONToClipboard } from '../utils/exportUtils';
 
@@ -27,7 +27,7 @@ interface HeaderProps {
   yearsData: YearData[];
   onResetData: () => void;
   onImportData: (imported: YearData[]) => void;
-  account: CloudAccount | null;
+  account: UserAccount | null;
   syncStatus: 'synced' | 'syncing' | 'offline' | 'local';
   onOpenAuth: () => void;
   onLogout: () => void;
@@ -232,7 +232,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <p className="text-xs font-bold text-white truncate">
                           {account.displayName}
                         </p>
-                        <p className="text-[11px] text-slate-400 truncate">ID: {account.accountId}</p>
+                        <p className="text-[11px] text-slate-400 truncate">{account.emailOrUsername}</p>
                         <div className="mt-2 flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium">
                           <CloudCheck className="h-3.5 w-3.5" />
                           <span>Autoguardado en tiempo real activo</span>

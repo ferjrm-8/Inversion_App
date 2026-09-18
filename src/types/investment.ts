@@ -6,8 +6,6 @@ export interface PlatformRecord {
   category: AssetCategory;
   invested: number;
   valuation: number;
-  // profit is calculated as valuation - invested
-  // profitPercentage is calculated as ((valuation - invested) / invested) * 100
 }
 
 export interface OtherFundItem {
@@ -24,10 +22,10 @@ export interface MonthRecord {
   month: number; // 1 to 12
   monthName: string;
   platforms: PlatformRecord[];
-  otherFunds?: OtherFundItem[]; // bank accounts, cash, car, etc.
+  otherFunds?: OtherFundItem[];
   notes?: string;
   hasData: boolean;
-  isClosed?: boolean; // When false or undefined on the current month, month is in progress (in-course)
+  isClosed?: boolean;
 }
 
 export interface YearData {
@@ -43,10 +41,9 @@ export interface InvestmentStore {
   customPlatforms: string[];
 }
 
-export interface CloudAccount {
-  accountId: string;
+export interface UserAccount {
+  userId: string;
+  emailOrUsername: string;
   displayName: string;
-  pin?: string;
   lastSyncedAt?: string;
 }
-

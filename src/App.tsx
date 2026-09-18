@@ -3,21 +3,20 @@ import { Header } from './components/Header';
 import { DataEntryTab } from './components/DataEntryTab';
 import { AnalyticsTab } from './components/AnalyticsTab';
 import { AuthModal } from './components/AuthModal';
-import { CloudAccount, OtherFundItem, PlatformRecord, YearData } from './types/investment';
+import { UserAccount, OtherFundItem, PlatformRecord, YearData } from './types/investment';
 import { INITIAL_YEARS_DATA, MONTH_NAMES_ES } from './data/initialData';
 import {
-  clearStoredAccount,
-  getStoredAccount,
+  getStoredUserSession,
+  clearStoredUserSession,
   savePortfolioToCloud,
   subscribePortfolioFromCloud,
 } from './firebase';
 
-// Local storage key for portfolio data
-const getStorageKey = (accountId?: string) =>
-  accountId ? `mis_inversiones_data_${accountId}` : 'mis_inversiones_data_local_v2';
+const getStorageKey = (userId?: string) =>
+  userId ? `mis_inversiones_data_${userId}` : 'mis_inversiones_data_local_v3';
 
 export default function App() {
-  const [account, setAccount] = useState<CloudAccount | null>(() => getStoredAccount());
+  const [account, setAccount] = useState<UserAccount | null>(() => getStoredUserSession());
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'offline' | 'local'>(
     account ? 'synced' : 'local'
@@ -26,8 +25,8 @@ export default function App() {
 
   const [yearsData, setYearsData] = useState<YearData[]>(() => {
     try {
-      const initialAccount = getStoredAccount();
-      const storageKey = getStorageKey(initialAccount?.accountId);
+      const initialUser = getStoredUserSession();
+      const storageKey = getStorageKey(initialUser?.userId);
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -45,11 +44,9 @@ export default function App() {
   const [selectedYear, setSelectedYear] = useState<number>(2026);
   const [selectedMonth, setSelectedMonth] = useState<number>(9);
 
-  // Ref to prevent triggering auto-save loop when data is received from cloud subscription
   const isReceivingCloudDataRef = useRef(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Toast notifier
   const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
@@ -57,7 +54,7 @@ export default function App() {
     }, 3500);
   }, []);
 
-  // Subscribe to cloud changes when account is active
+  // Multi-device real-time subscription when user is logged in
   useEffect(() => {
     if (!account) {
       setSyncStatus('local');
@@ -65,10 +62,9 @@ export default function App() {
     }
 
     setSyncStatus('syncing');
-    isReceivingCloudDataRef.current = true;
 
-    // Load local cache for this account first
-    const storageKey = getStorageKey(account.accountId);
+    // Load local cached version for instant UX
+    const storageKey = getStorageKey(account.userId);
     const cached = localStorage.getItem(storageKey);
     if (cached) {
       try {
@@ -82,20 +78,20 @@ export default function App() {
     }
 
     const unsubscribe = subscribePortfolioFromCloud(
-      account.accountId,
+      account.userId,
       (cloudData) => {
-        if (cloudData && cloudData.length > 0) {
+        if (cloudData && Array.isArray(cloudData) && cloudData.length > 0) {
           isReceivingCloudDataRef.current = true;
           setYearsData(cloudData);
           try {
             localStorage.setItem(storageKey, JSON.stringify(cloudData));
           } catch (e) {
-            console.warn(e);
+            console.warn('Local storage write warning', e);
           }
           setSyncStatus('synced');
           setTimeout(() => {
             isReceivingCloudDataRef.current = false;
-          }, 300);
+          }, 400);
         }
       },
       (err) => {
@@ -106,25 +102,23 @@ export default function App() {
     );
 
     setTimeout(() => {
-      isReceivingCloudDataRef.current = false;
       setSyncStatus('synced');
-    }, 800);
+    }, 600);
 
     return () => {
       unsubscribe();
     };
   }, [account]);
 
-  // AUTO-SAVE ON EVERY CHANGE (LocalStorage + Cloud)
+  // AUTO-SAVE ON EVERY CHANGE (LocalStorage + Firestore)
   useEffect(() => {
-    const storageKey = getStorageKey(account?.accountId);
+    const storageKey = getStorageKey(account?.userId);
     try {
       localStorage.setItem(storageKey, JSON.stringify(yearsData));
     } catch (e) {
       console.error('Failed to save data to localStorage', e);
     }
 
-    // If not connected to cloud or if this update came directly from the cloud, skip pushing
     if (!account || isReceivingCloudDataRef.current) return;
 
     if (saveTimeoutRef.current) {
@@ -135,17 +129,16 @@ export default function App() {
     saveTimeoutRef.current = setTimeout(async () => {
       try {
         await savePortfolioToCloud(
-          account.accountId,
+          account.userId,
           yearsData,
-          account.displayName,
-          account.pin
+          account.displayName
         );
         setSyncStatus('synced');
       } catch (err) {
         console.error('Cloud auto-save error:', err);
         setSyncStatus('offline');
       }
-    }, 450);
+    }, 400);
 
     return () => {
       if (saveTimeoutRef.current) {
@@ -163,27 +156,25 @@ export default function App() {
     setSyncStatus('syncing');
     try {
       await savePortfolioToCloud(
-        account.accountId,
+        account.userId,
         yearsData,
-        account.displayName,
-        account.pin
+        account.displayName
       );
       setSyncStatus('synced');
-      showToast('Cartera guardada en la nube con éxito');
+      showToast('Cartera sincronizada con la nube con éxito');
     } catch (err) {
       console.error(err);
       setSyncStatus('offline');
-      showToast('Error al conectar con la nube');
+      showToast('Error al conectar con la base de datos');
     }
   };
 
   // Handle Logout / Disconnect Cloud
   const handleLogout = () => {
-    clearStoredAccount();
+    clearStoredUserSession();
     setAccount(null);
     setSyncStatus('local');
 
-    // Load guest data
     const guestKey = getStorageKey();
     const savedGuest = localStorage.getItem(guestKey);
     if (savedGuest) {
@@ -198,18 +189,18 @@ export default function App() {
     } else {
       setYearsData(INITIAL_YEARS_DATA);
     }
-    showToast('Desconectado de la nube');
+    showToast('Sesión cerrada');
   };
 
   // Success handler from AuthModal
-  const handleAuthSuccess = (connectedAccount: CloudAccount, loadedData?: YearData[]) => {
+  const handleAuthSuccess = (connectedAccount: UserAccount, loadedData?: YearData[]) => {
     setAccount(connectedAccount);
     if (loadedData && loadedData.length > 0) {
       setYearsData(loadedData);
       const maxYear = Math.max(...loadedData.map((y) => y.year));
       setSelectedYear(maxYear);
     }
-    showToast(`Conectado a la cartera de ${connectedAccount.displayName}`);
+    showToast(`Bienvenido ${connectedAccount.displayName}, datos sincronizados`);
   };
 
   // Update month data
@@ -361,7 +352,7 @@ export default function App() {
   };
 
   const handleResetData = () => {
-    const key = getStorageKey(account?.accountId);
+    const key = getStorageKey(account?.userId);
     localStorage.removeItem(key);
     setYearsData(INITIAL_YEARS_DATA);
     setSelectedYear(2026);
@@ -427,7 +418,6 @@ export default function App() {
         onClose={() => setIsAuthOpen(false)}
         onSuccess={handleAuthSuccess}
         currentYearsData={yearsData}
-        currentAccount={account}
       />
     </div>
   );
