@@ -206,7 +206,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
       )}
 
       {/* Year Selector Horizontal Carousel */}
-      <div className="flex items-center justify-between gap-2 rounded-2xl border border-slate-800 bg-slate-900 p-2 sm:p-3 shadow-xs">
+      <div className="flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-2 sm:p-3 shadow-xs">
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
           <span className="hidden sm:inline-block mr-1 text-xs font-bold uppercase tracking-wider text-slate-500">
             Año:
@@ -218,7 +218,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
               onClick={() => onSelectYear(y.year)}
               className={`shrink-0 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
                 selectedYear === y.year
-                  ? 'bg-indigo-600 text-white shadow-xs'
+                  ? 'bg-purple-600 text-white shadow-xs'
                   : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
               }`}
             >
@@ -230,16 +230,16 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
         <button
           id="add-new-year-btn"
           onClick={onAddNewYear}
-          className="shrink-0 inline-flex items-center gap-1 rounded-xl border border-dashed border-slate-700 bg-slate-800/60 px-2.5 py-1.5 text-[11px] sm:text-xs font-semibold text-slate-300 hover:border-indigo-500 hover:text-white transition"
+          className="shrink-0 inline-flex items-center gap-1 rounded-xl border border-dashed border-slate-700 bg-slate-800/60 px-2.5 py-1.5 text-[11px] sm:text-xs font-semibold text-slate-300 hover:border-purple-500 hover:text-white transition"
           title="Añadir siguiente año"
         >
-          <Plus className="h-3.5 w-3.5 text-indigo-400" />
+          <Plus className="h-3.5 w-3.5 text-purple-400" />
           <span className="hidden xs:inline">+ Año</span>
         </button>
       </div>
 
       {/* Month Selector Carousel */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-2 sm:p-3">
+      <div className="rounded-2xl border border-slate-700/60 bg-slate-900/70 backdrop-blur-md backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-2 sm:p-3">
         <div className="flex items-center justify-between px-1 mb-1.5 sm:hidden">
           <span className="text-[10px] uppercase font-bold text-slate-500">
             Mes ({currentMonthData.monthName} {selectedYear})
@@ -268,7 +268,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
                 onClick={() => onSelectMonth(m.month)}
                 className={`flex flex-col items-center sm:items-start justify-between rounded-xl p-2 text-center sm:text-left border transition-all ${
                   isSelected
-                    ? 'border-indigo-500 bg-indigo-950/60 text-white shadow-xs ring-1 ring-indigo-500/50'
+                    ? 'border-purple-500 bg-purple-950/60 text-white shadow-xs ring-1 ring-purple-500/50'
                     : hasData
                     ? monthIsClosed
                       ? 'border-slate-800 bg-slate-800/70 hover:border-slate-700 text-slate-200'
@@ -280,7 +280,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
                   <span
                     className={`text-xs font-bold ${
                       isSelected
-                        ? 'text-indigo-300'
+                        ? 'text-purple-300'
                         : hasData
                         ? monthIsClosed
                           ? 'text-white'
@@ -340,10 +340,10 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
       </div>
 
       {/* Month Executive Summary Banner */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3.5 sm:p-5 shadow-xs">
+      <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-3.5 sm:p-5 shadow-xs">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-3 sm:pb-4 border-b border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-950/70 border border-indigo-800/80 text-indigo-400 shrink-0">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-950/70 border border-purple-800/80 text-purple-400 shrink-0">
               <Calendar className="h-5 w-5" />
             </div>
             <div>
@@ -376,7 +376,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
           <button
             id="open-rollover-modal-btn"
             onClick={() => setShowRolloverModal(true)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs font-bold text-white shadow-xs hover:bg-indigo-500 active:scale-98 transition"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-purple-600 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs font-bold text-white shadow-xs hover:bg-purple-500 active:scale-98 transition"
           >
             <Sparkles className="h-4 w-4" />
             <span>Traspasar y Cerrar hacia {nextMonthName}</span>
@@ -387,7 +387,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
         {/* 4 Metric Cards for Selected Month */}
         <div className="mt-3 sm:mt-4 grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
           {/* Card 1: Invertido Inicio */}
-          <div className="rounded-xl bg-slate-800/50 p-2.5 sm:p-3.5 border border-slate-800">
+          <div className="rounded-xl bg-slate-900/60 p-2.5 sm:p-3.5 border border-slate-700/40 backdrop-blur-md">
             <span className="block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400">
               Invertido Inicio
             </span>
@@ -404,7 +404,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
           </div>
 
           {/* Card 2: Valoración Cierre / Estado */}
-          <div className="rounded-xl bg-slate-800/50 p-2.5 sm:p-3.5 border border-slate-800">
+          <div className="rounded-xl bg-slate-900/60 p-2.5 sm:p-3.5 border border-slate-700/40 backdrop-blur-md">
             <span className="block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400">
               Valoración {isClosed ? 'Cierre' : '(En Curso)'}
             </span>
@@ -421,7 +421,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
           </div>
 
           {/* Card 3: Resultado / Beneficio */}
-          <div className="rounded-xl bg-slate-800/50 p-2.5 sm:p-3.5 border border-slate-800">
+          <div className="rounded-xl bg-slate-900/60 p-2.5 sm:p-3.5 border border-slate-700/40 backdrop-blur-md">
             <span className="block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400">
               Beneficio Mes (Profit)
             </span>
@@ -459,14 +459,14 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
           </div>
 
           {/* Card 4: Patrimonio Global de este mes */}
-          <div className="rounded-xl bg-indigo-950/40 p-2.5 sm:p-3.5 border border-indigo-900/60">
-            <span className="block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-indigo-300">
+          <div className="rounded-xl bg-purple-950/50 p-2.5 sm:p-3.5 border border-purple-800/40 backdrop-blur-md">
+            <span className="block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-purple-300">
               Patrimonio Mes
             </span>
-            <span className="mt-1 block text-base sm:text-lg font-bold text-indigo-200 font-mono">
+            <span className="mt-1 block text-base sm:text-lg font-bold text-purple-200 font-mono">
               {formatEuro(currentMonthTotals.globalNetWorth)}
             </span>
-            <span className="mt-0.5 block text-[10px] text-indigo-400/80 truncate">
+            <span className="mt-0.5 block text-[10px] text-purple-400/80 truncate">
               Cartera + Otros ({formatEuro(currentMonthTotals.otherFundsTotal)})
             </span>
           </div>
@@ -474,9 +474,9 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
       </div>
 
       {/* Main Positions Section */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 shadow-xs overflow-hidden">
+      <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 shadow-xs overflow-hidden">
         {/* Section Header */}
-        <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-slate-800 bg-slate-900/80">
+        <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-slate-800 bg-slate-900/70 backdrop-blur-md">
           <div>
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <span>Posiciones ({currentMonthData.monthName} {selectedYear})</span>
@@ -492,7 +492,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
             onClick={() => setShowAddPlatformForm(!showAddPlatformForm)}
             className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-700 hover:text-white transition"
           >
-            <Plus className="h-3.5 w-3.5 text-indigo-400" />
+            <Plus className="h-3.5 w-3.5 text-purple-400" />
             <span>Añadir</span>
           </button>
         </div>
@@ -501,7 +501,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
         {showAddPlatformForm && (
           <div className="border-b border-slate-800 bg-slate-800/40 p-3 sm:p-4 space-y-3">
             <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-              <Plus className="h-3.5 w-3.5 text-indigo-400" />
+              <Plus className="h-3.5 w-3.5 text-purple-400" />
               <span>Nueva Plataforma en {currentMonthData.monthName}</span>
             </div>
 
@@ -517,14 +517,14 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
                   const suggestedCat = DEFAULT_PLATFORM_CATEGORIES[name.toUpperCase()];
                   if (suggestedCat) setNewPlatformCategory(suggestedCat);
                 }}
-                className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-semibold text-white placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-semibold text-white placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500"
               />
 
               <select
                 id="new-platform-category-select"
                 value={newPlatformCategory}
                 onChange={(e) => setNewPlatformCategory(e.target.value as AssetCategory)}
-                className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-medium text-slate-200 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-medium text-slate-200 focus:outline-hidden focus:ring-2 focus:ring-purple-500"
               >
                 {CATEGORY_OPTIONS.map((c) => (
                   <option key={c} value={c}>
@@ -541,7 +541,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
                 onChange={(e) =>
                   setNewPlatformInvested(e.target.value === '' ? '' : Number(e.target.value))
                 }
-                className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-medium text-white placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-medium text-white placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500"
               />
 
               <input
@@ -552,7 +552,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
                 onChange={(e) =>
                   setNewPlatformValuation(e.target.value === '' ? '' : Number(e.target.value))
                 }
-                className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-medium text-white placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-medium text-white placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500"
               />
 
               <div className="flex gap-2">
@@ -560,7 +560,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
                   id="submit-add-platform-btn"
                   onClick={handleAddPlatform}
                   disabled={!newPlatformName.trim()}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-bold text-white shadow-xs hover:bg-indigo-500 disabled:opacity-50 transition"
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-purple-600 px-3 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-500 disabled:opacity-50 transition"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Guardar</span>
@@ -587,7 +587,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
                   onClick={() => {
                     onRolloverToNextMonth(prevFlattened.year, prevFlattened.month, 'keep_invested');
                   }}
-                  className="mt-3 inline-block rounded-xl bg-slate-800 px-3 py-1.5 text-xs text-indigo-400 font-semibold border border-slate-700"
+                  className="mt-3 inline-block rounded-xl bg-slate-800 px-3 py-1.5 text-xs text-purple-400 font-semibold border border-slate-700"
                 >
                   Copiar plataformas de {prevFlattened.monthName} {prevFlattened.year}
                 </button>
@@ -679,7 +679,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
 
           {/* Mobile Footer Total Card */}
           {platforms.length > 0 && (
-            <div className="p-3.5 bg-slate-950 border-t-2 border-slate-800">
+            <div className="p-3.5 bg-slate-950/80 backdrop-blur-md border-t-2 border-slate-800">
               <div className="flex items-center justify-between text-xs font-bold text-slate-300">
                 <span>TOTALES {currentMonthData.monthName.toUpperCase()}</span>
                 {isClosed ? (
@@ -752,7 +752,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
                           onChange={(e) =>
                             handlePlatformChange(p.id, 'category', e.target.value as AssetCategory)
                           }
-                          className="rounded-lg border border-slate-700 bg-slate-800 px-2 py-1 text-[11px] font-medium text-slate-300 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
+                          className="rounded-lg border border-slate-700 bg-slate-800 px-2 py-1 text-[11px] font-medium text-slate-300 focus:outline-hidden focus:ring-1 focus:ring-purple-500"
                         >
                           {CATEGORY_OPTIONS.map((cat) => (
                             <option key={cat} value={cat}>
@@ -764,7 +764,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
 
                       {/* Invested Input */}
                       <td className="py-2.5 px-3 text-right font-mono">
-                        <div className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 focus-within:border-indigo-500">
+                        <div className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 focus-within:border-purple-500">
                           <input
                             type="number"
                             step="any"
@@ -778,7 +778,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
 
                       {/* Valuation Input */}
                       <td className="py-2.5 px-3 text-right font-mono">
-                        <div className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 focus-within:border-indigo-500">
+                        <div className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 focus-within:border-purple-500">
                           <input
                             type="number"
                             step="any"
@@ -886,7 +886,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
       </div>
 
       {/* Other Funds & Global Capital Section (Editable for ANY month past or present) */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3.5 sm:p-5 shadow-xs">
+      <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-3.5 sm:p-5 shadow-xs">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between pb-3 sm:pb-4 border-b border-slate-800">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-400 shrink-0">
@@ -936,7 +936,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
                     type="number"
                     value={f.amount}
                     onChange={(e) => handleFundChange(f.id, Number(e.target.value) || 0)}
-                    className="w-20 rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-right text-xs font-bold text-white font-mono focus:outline-hidden focus:border-indigo-500"
+                    className="w-20 rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-right text-xs font-bold text-white font-mono focus:outline-hidden focus:border-purple-500"
                   />
                   <span className="text-xs text-slate-500">€</span>
                   <button
@@ -958,21 +958,21 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
             placeholder="Nuevo fondo (ej. EVO Banco, Efectivo)"
             value={newFundName}
             onChange={(e) => setNewFundName(e.target.value)}
-            className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-white placeholder:text-slate-500 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 flex-1 min-w-[160px]"
+            className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-white placeholder:text-slate-500 focus:outline-hidden focus:ring-1 focus:ring-purple-500 flex-1 min-w-[160px]"
           />
           <input
             type="number"
             placeholder="Importe (€)"
             value={newFundAmount}
             onChange={(e) => setNewFundAmount(e.target.value === '' ? '' : Number(e.target.value))}
-            className="w-24 rounded-xl border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-white placeholder:text-slate-500 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 font-mono"
+            className="w-24 rounded-xl border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-white placeholder:text-slate-500 focus:outline-hidden focus:ring-1 focus:ring-purple-500 font-mono"
           />
           <button
             onClick={handleAddFund}
             disabled={!newFundName.trim()}
             className="inline-flex items-center gap-1 rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-700 hover:text-white disabled:opacity-50 transition"
           >
-            <Plus className="h-3.5 w-3.5 text-indigo-400" />
+            <Plus className="h-3.5 w-3.5 text-purple-400" />
             <span>Añadir a {currentMonthData.monthName}</span>
           </button>
         </div>
@@ -989,7 +989,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
             className="w-full max-w-md rounded-2xl bg-slate-900 p-5 sm:p-6 shadow-2xl border border-slate-800 text-slate-200"
           >
             <div className="flex items-center gap-3 pb-3 border-b border-slate-800">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-950 border border-indigo-800 text-indigo-400">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-950 border border-purple-800 text-purple-400">
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
@@ -1010,7 +1010,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
               <label
                 className={`flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition ${
                   rolloverMode === 'keep_invested'
-                    ? 'border-indigo-500 bg-indigo-950/40 text-white'
+                    ? 'border-purple-500 bg-purple-950/40 text-white'
                     : 'border-slate-800 hover:bg-slate-800/50'
                 }`}
               >
@@ -1019,7 +1019,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
                   name="rolloverMode"
                   checked={rolloverMode === 'keep_invested'}
                   onChange={() => setRolloverMode('keep_invested')}
-                  className="mt-0.5 text-indigo-500"
+                  className="mt-0.5 text-purple-500"
                 />
                 <div>
                   <strong className="block font-semibold text-white">
@@ -1034,7 +1034,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
               <label
                 className={`flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition ${
                   rolloverMode === 'use_valuation'
-                    ? 'border-indigo-500 bg-indigo-950/40 text-white'
+                    ? 'border-purple-500 bg-purple-950/40 text-white'
                     : 'border-slate-800 hover:bg-slate-800/50'
                 }`}
               >
@@ -1043,7 +1043,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
                   name="rolloverMode"
                   checked={rolloverMode === 'use_valuation'}
                   onChange={() => setRolloverMode('use_valuation')}
-                  className="mt-0.5 text-indigo-500"
+                  className="mt-0.5 text-purple-500"
                 />
                 <div>
                   <strong className="block font-semibold text-white">
@@ -1067,7 +1067,7 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
               <button
                 id="confirm-rollover-btn"
                 onClick={handleExecuteRollover}
-                className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-500 transition"
+                className="rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white hover:bg-purple-500 transition"
               >
                 Confirmar y Traspasar
               </button>

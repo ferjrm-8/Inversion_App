@@ -5,6 +5,7 @@ import { AnalyticsTab } from './components/AnalyticsTab';
 import { AuthModal } from './components/AuthModal';
 import { UserAccount, OtherFundItem, PlatformRecord, YearData } from './types/investment';
 import { INITIAL_YEARS_DATA, MONTH_NAMES_ES } from './data/initialData';
+import investmentBg from './assets/investment_bg.jpg';
 import {
   getStoredUserSession,
   clearStoredUserSession,
@@ -90,7 +91,7 @@ export default function App() {
           const maxYear = Math.max(...cloudResult.yearsData.map((y) => y.year));
           setSelectedYear(maxYear);
           setLastSyncedAt(new Date().toLocaleTimeString());
-          showToast(`Datos actualizados desde la nube (${account.displayName})`);
+          showToast(`Datos sincronizados desde la nube (${account.displayName})`);
         } else {
           // New account with no data in cloud yet: upload initial template
           await savePortfolioToCloud(account.userId, yearsData, account.displayName);
@@ -460,34 +461,46 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-600 selection:text-white pb-6 sm:pb-8 relative">
+    <div className="min-h-screen text-slate-100 flex flex-col font-sans selection:bg-purple-600 selection:text-white pb-8 relative overflow-x-hidden">
+      {/* Financial Blueprint Background Wallpaper (Fixed across all pages) */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat bg-fixed"
+        style={{
+          backgroundImage: `url(${investmentBg})`,
+        }}
+      />
+      {/* Deep atmospheric overlay layer for optimal contrast and text legibility */}
+      <div className="fixed inset-0 pointer-events-none z-0 bg-slate-950/50 backdrop-blur-[1px]" />
+
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-xl border border-indigo-500/40 bg-slate-900/95 px-4 py-3 text-xs font-semibold text-white shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom-3 duration-200">
-          <div className="h-2 w-2 rounded-full bg-indigo-400 animate-pulse" />
+        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-xl border border-purple-500/40 bg-slate-900/95 px-4 py-3 text-xs font-semibold text-white shadow-2xl backdrop-blur-xl animate-in slide-in-from-bottom-3 duration-200">
+          <div className="h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Top Navigation & Header */}
-      <Header
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        yearsData={yearsData}
-        onResetData={handleResetData}
-        onImportData={handleImportData}
-        account={account}
-        syncStatus={syncStatus}
-        lastSyncedAt={lastSyncedAt}
-        onOpenAuth={() => setIsAuthOpen(true)}
-        onLogout={handleLogout}
-        onForceSaveCloud={handleForceSaveCloud}
-        onReloadFromCloud={handleReloadFromCloud}
-        onShowToast={showToast}
-      />
+      <div className="relative z-10">
+        <Header
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          yearsData={yearsData}
+          onResetData={handleResetData}
+          onImportData={handleImportData}
+          account={account}
+          syncStatus={syncStatus}
+          lastSyncedAt={lastSyncedAt}
+          onOpenAuth={() => setIsAuthOpen(true)}
+          onLogout={handleLogout}
+          onForceSaveCloud={handleForceSaveCloud}
+          onReloadFromCloud={handleReloadFromCloud}
+          onShowToast={showToast}
+        />
+      </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 mx-auto max-w-7xl w-full px-2.5 sm:px-6 lg:px-8 py-3 sm:py-6">
+      {/* Main Content Area (Floating Cards Layout) */}
+      <main className="relative z-10 flex-1 mx-auto max-w-7xl w-full px-2.5 sm:px-6 lg:px-8 py-3 sm:py-6">
         {activeTab === 'data' ? (
           <DataEntryTab
             yearsData={yearsData}

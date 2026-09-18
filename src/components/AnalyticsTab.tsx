@@ -47,7 +47,7 @@ interface AnalyticsTabProps {
 }
 
 const PLATFORM_COLORS = [
-  '#6366f1', // Indigo
+  '#a855f7', // Indigo
   '#06b6d4', // Cyan
   '#10b981', // Emerald
   '#f59e0b', // Amber
@@ -196,7 +196,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Time Horizon Filter Bar */}
-      <div className="flex items-center justify-between gap-2 rounded-2xl border border-slate-800 bg-slate-900 p-2 sm:p-3 shadow-xs">
+      <div className="flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-2 sm:p-3 shadow-xs">
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 w-full">
           <Calendar className="h-4 w-4 text-slate-500 ml-1 shrink-0 hidden sm:inline" />
           <span className="text-xs font-bold uppercase tracking-wider text-slate-500 shrink-0 hidden sm:inline mr-1">
@@ -208,7 +208,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
             onClick={() => setTimeframe('ALL')}
             className={`shrink-0 rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
               timeframe === 'ALL'
-                ? 'bg-indigo-600 text-white shadow-xs'
+                ? 'bg-purple-600 text-white shadow-xs'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
@@ -219,7 +219,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
             onClick={() => setTimeframe('LTM')}
             className={`shrink-0 rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
               timeframe === 'LTM'
-                ? 'bg-indigo-600 text-white shadow-xs'
+                ? 'bg-purple-600 text-white shadow-xs'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
@@ -245,12 +245,12 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
       {/* Primary KPI Grid (2 cols on mobile, 4 on desktop) */}
       <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
         {/* KPI 1: Valoración Total Cartera */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3.5 sm:p-4 shadow-xs">
+        <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-3.5 sm:p-4 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-400">
               Valoración Cartera {globalMetrics.lastClosedMonth ? `(${globalMetrics.lastClosedMonth.monthName.slice(0, 3)})` : ''}
             </span>
-            <div className="rounded-lg bg-indigo-950/80 border border-indigo-800/80 p-1 text-indigo-400">
+            <div className="rounded-lg bg-purple-950/80 border border-purple-800/80 p-1 text-purple-400">
               <Wallet className="h-3.5 w-3.5" />
             </div>
           </div>
@@ -263,7 +263,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
         </div>
 
         {/* KPI 2: Capital Invertido */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3.5 sm:p-4 shadow-xs">
+        <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-3.5 sm:p-4 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-400">
               Invertido {globalMetrics.inCourseMonth ? '(Apunte Actual)' : ''}
@@ -281,7 +281,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
         </div>
 
         {/* KPI 3: Beneficio Total Acumulado */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3.5 sm:p-4 shadow-xs">
+        <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-3.5 sm:p-4 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-400">Beneficio Consolidado</span>
             <div
@@ -311,23 +311,23 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
         </div>
 
         {/* KPI 4: Patrimonio Neto Global */}
-        <div className="rounded-2xl border border-indigo-900/60 bg-gradient-to-br from-indigo-950/50 to-slate-900 p-3.5 sm:p-4 shadow-xs">
+        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-purple-950/60 to-slate-950/80 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/20 p-3.5 sm:p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-indigo-300">Patrimonio Global</span>
-            <div className="rounded-lg bg-indigo-900/70 border border-indigo-700/60 p-1 text-indigo-300">
+            <span className="text-[11px] font-bold text-purple-300">Patrimonio Global</span>
+            <div className="rounded-lg bg-purple-900/70 border border-purple-700/60 p-1 text-purple-300">
               <Award className="h-3.5 w-3.5" />
             </div>
           </div>
-          <span className="mt-2 block text-lg font-black text-indigo-200 sm:text-2xl font-mono">
+          <span className="mt-2 block text-lg font-black text-purple-200 sm:text-2xl font-mono">
             {formatEuro(globalMetrics.currentGlobalNetWorth)}
           </span>
-          <span className="mt-0.5 block text-[10px] sm:text-xs text-indigo-300/80 truncate">
+          <span className="mt-0.5 block text-[10px] sm:text-xs text-purple-300/80 truncate">
             Inversiones + Bancos / Otros fondos
           </span>
         </div>
 
         {/* KPI 5: Tasa de Éxito Mensual */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3.5 sm:p-4 shadow-xs">
+        <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-3.5 sm:p-4 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-400">Meses Positivos</span>
             <div className="rounded-lg bg-emerald-950/70 border border-emerald-800 text-emerald-400 p-1">
@@ -343,7 +343,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
         </div>
 
         {/* KPI 6: Mejor Mes Histórico */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3.5 sm:p-4 shadow-xs">
+        <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-3.5 sm:p-4 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-400">Mejor Mes</span>
             <div className="rounded-lg bg-emerald-950/70 border border-emerald-800 text-emerald-400 p-1">
@@ -359,7 +359,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
         </div>
 
         {/* KPI 7: Peor Mes Histórico */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3.5 sm:p-4 shadow-xs">
+        <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-3.5 sm:p-4 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-400">Peor Mes</span>
             <div className="rounded-lg bg-rose-950/70 border border-rose-800 text-rose-400 p-1">
@@ -375,7 +375,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
         </div>
 
         {/* KPI 8: Máximo Drawdown */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3.5 sm:p-4 shadow-xs">
+        <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-3.5 sm:p-4 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-400">Max Drawdown</span>
             <div className="rounded-lg bg-amber-950/70 border border-amber-800 text-amber-400 p-1">
@@ -392,7 +392,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
       </div>
 
       {/* NEW MODULE: Cambio de Patrimonio Global Mes a Mes (Área + Barras de Variación) */}
-      <div className="rounded-2xl border border-emerald-900/60 bg-slate-900 p-3.5 sm:p-5 shadow-xs">
+      <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-emerald-500/20 p-3.5 sm:p-5 shadow-xs">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between pb-3 sm:pb-4 border-b border-slate-800">
           <div>
             <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
@@ -409,8 +409,8 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
               <span className="text-emerald-300">Patrimonio Global</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-indigo-400" />
-              <span className="text-indigo-300">Cartera Invertida</span>
+              <span className="h-2.5 w-2.5 rounded-full bg-purple-400" />
+              <span className="text-purple-300">Cartera Invertida</span>
             </div>
           </div>
         </div>
@@ -449,7 +449,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
                 type="monotone"
                 dataKey="valuation"
                 name="Cartera Inversión"
-                stroke="#6366f1"
+                stroke="#a855f7"
                 strokeWidth={1.8}
                 strokeDasharray="4 4"
                 fillOpacity={1}
@@ -526,11 +526,11 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
       </div>
 
       {/* Chart 1: Evolución: Invertido vs. Valoración Cartera (Meses cerrados para no distorsionar) */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3.5 sm:p-5 shadow-xs">
+      <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-3.5 sm:p-5 shadow-xs">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between pb-3 sm:pb-4 border-b border-slate-800">
           <div>
             <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-              <Activity className="h-4 w-4 text-indigo-400" />
+              <Activity className="h-4 w-4 text-purple-400" />
               Evolución: Invertido vs. Valoración de Cartera (Meses Consolidados)
             </h3>
             <p className="text-[11px] text-slate-400">
@@ -543,8 +543,8 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
               <span className="text-slate-400">Invertido</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
-              <span className="text-indigo-300">Valoración</span>
+              <span className="h-2.5 w-2.5 rounded-full bg-purple-500" />
+              <span className="text-purple-300">Valoración</span>
             </div>
           </div>
         </div>
@@ -582,7 +582,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
                 type="monotone"
                 dataKey="valuation"
                 name="Valoración"
-                stroke="#6366f1"
+                stroke="#a855f7"
                 strokeWidth={2.5}
                 fillOpacity={1}
                 fill="url(#colorValuation)"
@@ -593,7 +593,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
       </div>
 
       {/* Chart 2: Beneficio Neto Mensual (€ Generados por Mes) */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3.5 sm:p-5 shadow-xs">
+      <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-3.5 sm:p-5 shadow-xs">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between pb-3 sm:pb-4 border-b border-slate-800">
           <div>
             <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
@@ -640,12 +640,12 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
       {/* Row of Two: Category Allocation + Platform Shares */}
       <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Category Allocation */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3.5 sm:p-5 shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-3.5 sm:p-5 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div>
                 <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-                  <PieIcon className="h-4 w-4 text-indigo-400" />
+                  <PieIcon className="h-4 w-4 text-purple-400" />
                   Distribución por Tipo de Activo
                 </h3>
                 <p className="text-[11px] text-slate-400">
@@ -705,7 +705,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
         </div>
 
         {/* Platform Allocation Bars */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-3.5 sm:p-5 shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 p-3.5 sm:p-5 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div>
@@ -756,10 +756,10 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
       </div>
 
       {/* Monthly Heatmap Matrix (Only closed months) */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 shadow-xs overflow-hidden">
+      <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 shadow-xs overflow-hidden">
         <div className="p-3.5 sm:p-5 border-b border-slate-800 bg-slate-900/90">
           <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-            <TableIcon className="h-4 w-4 text-indigo-400" />
+            <TableIcon className="h-4 w-4 text-purple-400" />
             Matriz de Rendimiento Mensual (% y Retorno por Año Consolidado)
           </h3>
           <p className="text-[11px] text-slate-400">
@@ -834,10 +834,10 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
       </div>
 
       {/* Consolidated Annual Summary Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 shadow-xs overflow-hidden">
+      <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-2xl shadow-black/50 ring-1 ring-purple-500/10 shadow-xs overflow-hidden">
         <div className="p-3.5 sm:p-5 border-b border-slate-800 bg-slate-900/90">
           <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-indigo-400" />
+            <Calendar className="h-4 w-4 text-purple-400" />
             Resumen Consolidado por Años
           </h3>
           <p className="text-[11px] text-slate-400">
@@ -865,7 +865,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ yearsData }) => {
                   <td className="py-2.5 px-3 font-bold font-sans text-white">{s.year}</td>
                   <td className="py-2.5 px-2 text-right">{formatEuro(s.startInvested)}</td>
                   <td className="py-2.5 px-2 text-right font-bold text-slate-200">{formatEuro(s.endInvested)}</td>
-                  <td className="py-2.5 px-2 text-right font-bold text-indigo-400">
+                  <td className="py-2.5 px-2 text-right font-bold text-purple-400">
                     +{formatEuro(s.investedIncrease)}
                   </td>
                   <td className="py-2.5 px-2 text-right font-bold text-white">

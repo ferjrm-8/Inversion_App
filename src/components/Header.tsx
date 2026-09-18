@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import {
-  TrendingUp,
+  Zap,
   Table,
   BarChart3,
   Download,
@@ -12,7 +12,6 @@ import {
   CloudCheck,
   CloudUpload,
   CloudOff,
-  User as UserIcon,
   LogOut,
   Copy,
   Check,
@@ -116,26 +115,18 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-slate-700/60 bg-slate-950/80 backdrop-blur-xl shadow-lg shadow-black/20">
       <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-2 sm:gap-4">
           {/* Logo & App Title */}
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 shadow-md shadow-indigo-600/20 text-white">
-              <TrendingUp className="h-5 w-5" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 via-purple-500 to-indigo-600 shadow-lg shadow-purple-600/30 text-white">
+              <Zap className="h-5 w-5 fill-white text-white" />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-bold tracking-tight text-white truncate">
-                  Mis Inversiones
-                </h1>
-                {account && (
-                  <span className="hidden md:inline-flex items-center gap-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 text-[10px] font-semibold text-indigo-300">
-                    <CloudCheck className="h-3 w-3 text-indigo-400" />
-                    <span>Nube activa</span>
-                  </span>
-                )}
-              </div>
+              <h1 className="text-base sm:text-lg font-bold tracking-tight text-white truncate">
+                Mis Inversiones
+              </h1>
               <p className="text-[11px] text-slate-400 truncate hidden sm:block">
                 Gestor patrimonial mensual multidispositivo
               </p>
@@ -143,13 +134,13 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Quick Metrics Badge (Desktop) */}
-          <div className="hidden lg:flex items-center gap-4 bg-slate-900/80 border border-slate-800 rounded-xl px-3 py-1.5 text-xs">
+          <div className="hidden lg:flex items-center gap-4 bg-slate-900/80 border border-slate-700/60 rounded-xl px-3.5 py-1.5 text-xs shadow-md shadow-black/30 backdrop-blur-md">
             <div className="flex items-center gap-1.5">
-              <Wallet className="h-3.5 w-3.5 text-indigo-400" />
+              <Wallet className="h-3.5 w-3.5 text-purple-400" />
               <span className="text-slate-400 font-medium">Patrimonio Actual:</span>
               <span className="font-bold text-white">{formatEuro(globalMetrics.currentValuation)}</span>
             </div>
-            <div className="h-3 w-px bg-slate-800" />
+            <div className="h-3 w-px bg-slate-700/60" />
             <div className="flex items-center gap-1.5">
               <span className="text-slate-400 font-medium">Rentabilidad Total:</span>
               <span
@@ -165,32 +156,32 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right Action Controls */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Tab Navigation (Data Entry vs Analytics) */}
-            <div className="flex items-center rounded-xl bg-slate-900 p-1 border border-slate-800">
+            {/* Tab Navigation (Registro vs Métricas) */}
+            <div className="flex items-center rounded-xl bg-slate-900/90 p-1 border border-slate-700/60 shadow-inner">
               <button
                 id="tab-data-entry-btn"
                 onClick={() => setActiveTab('data')}
-                className={`flex items-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-1.5 font-medium transition cursor-pointer ${
+                className={`flex items-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs font-semibold transition-all duration-150 cursor-pointer ${
                   activeTab === 'data'
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-indigo-400'
+                    ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
+                    : 'text-slate-400 hover:text-purple-300 hover:bg-slate-800/60'
                 }`}
               >
                 <Table className="h-3.5 w-3.5" />
-                <span className="text-[11px] sm:text-xs">Tablas</span>
+                <span>Registro</span>
               </button>
 
               <button
                 id="tab-analytics-btn"
                 onClick={() => setActiveTab('analytics')}
-                className={`flex items-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-1.5 font-medium transition cursor-pointer ${
+                className={`flex items-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs font-semibold transition-all duration-150 cursor-pointer ${
                   activeTab === 'analytics'
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-indigo-400'
+                    ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
+                    : 'text-slate-400 hover:text-purple-300 hover:bg-slate-800/60'
                 }`}
               >
                 <BarChart3 className="h-3.5 w-3.5" />
-                <span className="text-[11px] sm:text-xs">Métricas</span>
+                <span>Métricas</span>
               </button>
             </div>
 
@@ -199,7 +190,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 id="login-btn-top"
                 onClick={onOpenAuth}
-                className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold shadow-xs transition cursor-pointer"
+                className="flex items-center gap-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold shadow-md shadow-purple-600/25 transition cursor-pointer"
                 title="Sincronizar datos en la nube y compartir"
               >
                 <Cloud className="h-3.5 w-3.5" />
@@ -211,12 +202,12 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   id="user-menu-btn"
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className={`flex items-center gap-1.5 rounded-xl border px-2.5 sm:px-3 py-1.5 text-xs font-semibold shadow-xs transition cursor-pointer ${
+                  className={`flex items-center gap-1.5 rounded-xl border px-2.5 sm:px-3 py-1.5 text-xs font-semibold shadow-md transition cursor-pointer backdrop-blur-md ${
                     syncStatus === 'syncing'
-                      ? 'border-amber-500/40 bg-amber-950/40 text-amber-300 hover:bg-amber-900/50'
+                      ? 'border-amber-500/40 bg-amber-950/60 text-amber-300 hover:bg-amber-900/60'
                       : syncStatus === 'offline'
-                      ? 'border-rose-500/40 bg-rose-950/40 text-rose-300'
-                      : 'border-emerald-500/40 bg-emerald-950/50 text-emerald-300 hover:bg-emerald-900/50'
+                      ? 'border-rose-500/40 bg-rose-950/60 text-rose-300'
+                      : 'border-purple-500/40 bg-purple-950/40 text-purple-200 hover:bg-purple-900/40'
                   }`}
                   title={`Conectado como ${account.displayName}. Clic para ver opciones.`}
                 >
@@ -225,7 +216,7 @@ export const Header: React.FC<HeaderProps> = ({
                   ) : syncStatus === 'offline' ? (
                     <CloudOff className="h-3.5 w-3.5 text-rose-400" />
                   ) : (
-                    <CloudCheck className="h-3.5 w-3.5 text-emerald-400" />
+                    <CloudCheck className="h-3.5 w-3.5 text-purple-400" />
                   )}
                   <span>
                     {syncStatus === 'syncing'
@@ -242,7 +233,7 @@ export const Header: React.FC<HeaderProps> = ({
                       className="fixed inset-0 z-30"
                       onClick={() => setShowUserMenu(false)}
                     />
-                    <div className="absolute right-0 z-40 mt-2 w-72 rounded-2xl border border-slate-700 bg-slate-900 p-3 shadow-2xl animate-in fade-in zoom-in-95 duration-100">
+                    <div className="absolute right-0 z-40 mt-2 w-72 rounded-2xl border border-slate-700 bg-slate-900/95 p-3 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100">
                       <div className="px-3 py-2 border-b border-slate-800">
                         <p className="text-xs font-bold text-white truncate">
                           {account.displayName}
@@ -253,9 +244,9 @@ export const Header: React.FC<HeaderProps> = ({
                             Última lectura/guardado: {lastSyncedAt}
                           </p>
                         )}
-                        <div className="mt-2 flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium">
-                          <CloudCheck className="h-3.5 w-3.5 shrink-0" />
-                          <span>Guardado automático activado</span>
+                        <div className="mt-2 flex items-center gap-1.5 text-[10px] text-purple-300 font-medium">
+                          <CloudCheck className="h-3.5 w-3.5 shrink-0 text-purple-400" />
+                          <span>Guardado automático en la nube</span>
                         </div>
                       </div>
 
@@ -268,9 +259,9 @@ export const Header: React.FC<HeaderProps> = ({
                             await onReloadFromCloud();
                             setIsManualSyncing(false);
                           }}
-                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-indigo-300 hover:bg-slate-800 transition cursor-pointer"
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-purple-300 hover:bg-slate-800/80 transition cursor-pointer"
                         >
-                          <RefreshCw className={`h-3.5 w-3.5 text-indigo-400 ${isManualSyncing ? 'animate-spin' : ''}`} />
+                          <RefreshCw className={`h-3.5 w-3.5 text-purple-400 ${isManualSyncing ? 'animate-spin' : ''}`} />
                           <span>Descargar / Recargar de la Nube</span>
                         </button>
 
@@ -282,9 +273,9 @@ export const Header: React.FC<HeaderProps> = ({
                             await onForceSaveCloud();
                             setIsManualSyncing(false);
                           }}
-                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 transition cursor-pointer"
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800/80 transition cursor-pointer"
                         >
-                          <CloudUpload className="h-3.5 w-3.5 text-indigo-400" />
+                          <CloudUpload className="h-3.5 w-3.5 text-purple-400" />
                           <span>Subir y Guardar en la Nube Ahora</span>
                         </button>
 
@@ -312,7 +303,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 id="data-menu-toggle-btn"
                 onClick={() => setShowDataMenu(!showDataMenu)}
-                className="inline-flex items-center justify-center rounded-xl border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-semibold text-slate-300 shadow-2xs hover:bg-slate-700 hover:text-white transition cursor-pointer"
+                className="inline-flex items-center justify-center rounded-xl border border-slate-700/80 bg-slate-800/90 px-2.5 py-1.5 text-xs font-semibold text-slate-300 shadow-md hover:bg-slate-700 hover:text-white transition cursor-pointer backdrop-blur-md"
                 title="Copia de seguridad y exportar"
               >
                 <Download className="h-3.5 w-3.5" />
@@ -325,29 +316,29 @@ export const Header: React.FC<HeaderProps> = ({
                     className="fixed inset-0 z-30"
                     onClick={() => setShowDataMenu(false)}
                   />
-                  <div className="absolute right-0 z-40 mt-2 w-56 rounded-2xl border border-slate-700 bg-slate-900 p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-100">
+                  <div className="absolute right-0 z-40 mt-2 w-56 rounded-2xl border border-slate-700 bg-slate-900/95 p-2 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100">
                     <button
                       id="export-json-btn"
                       onClick={handleExportJSON}
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 transition cursor-pointer"
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800/80 transition cursor-pointer"
                     >
-                      <Download className="h-3.5 w-3.5 text-indigo-400" />
+                      <Download className="h-3.5 w-3.5 text-purple-400" />
                       Descargar Copia JSON
                     </button>
 
                     <button
                       id="export-csv-btn"
                       onClick={handleExportCSV}
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 transition cursor-pointer"
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800/80 transition cursor-pointer"
                     >
-                      <FileSpreadsheet className="h-3.5 w-3.5 text-indigo-400" />
+                      <FileSpreadsheet className="h-3.5 w-3.5 text-purple-400" />
                       Exportar a Excel (CSV)
                     </button>
 
                     <button
                       id="copy-json-clipboard-btn"
                       onClick={handleCopyClipboard}
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 transition cursor-pointer"
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800/80 transition cursor-pointer"
                     >
                       {copied ? (
                         <Check className="h-3.5 w-3.5 text-emerald-400" />
@@ -362,7 +353,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                       id="import-json-btn"
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 transition cursor-pointer"
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800/80 transition cursor-pointer"
                     >
                       <Upload className="h-3.5 w-3.5 text-emerald-400" />
                       Importar Backup JSON
