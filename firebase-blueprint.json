@@ -1,0 +1,21 @@
+{
+  "entities": {
+    "UserProfile": {
+      "path": "users/{userId}",
+      "description": "User profile and settings",
+      "fields": {
+        "email": { "type": "string", "description": "User email address" },
+        "displayName": { "type": "string", "description": "Display name of the user" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last update" }
+      }
+    },
+    "UserPortfolio": {
+      "path": "users/{userId}/portfolio/{docId}",
+      "description": "User portfolio investment data",
+      "fields": {
+        "yearsData": { "type": "array", "description": "Array of YearData containing months, platforms, and other funds" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last cloud sync" }
+      }
+    }
+  }
+}

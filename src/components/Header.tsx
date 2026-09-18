@@ -8,9 +8,19 @@ import {
   RotateCcw,
   Wallet,
   FileSpreadsheet,
+  Cloud,
+  CloudCheck,
+  CloudUpload,
+  CloudOff,
+  User as UserIcon,
+  LogOut,
+  Copy,
+  Check,
 } from 'lucide-react';
+import { User } from 'firebase/auth';
 import { YearData } from '../types/investment';
-import { calculateGlobalMetrics, formatEuro, formatPercent } from '../utils/calculations';
+import { calculateGlobalMetrics, formatEuro } from '../utils/calculations';
+import { exportJSONFile, exportCSVFile, copyJSONToClipboard } from '../utils/exportUtils';
 
 interface HeaderProps {
   activeTab: 'data' | 'analytics';
@@ -18,7 +28,12 @@ interface HeaderProps {
   yearsData: YearData[];
   onResetData: () => void;
   onImportData: (imported: YearData[]) => void;
-  onExportCSV: () => void;
+  user: User | null;
+  syncStatus: 'synced' | 'syncing' | 'offline' | 'local';
+  onOpenAuth: () => void;
+  onLogout: () => void;
+  onForceSaveCloud: () => Promise<void>;
+  onShowToast: (msg: string) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -27,27 +42,42 @@ export const Header: React.FC<HeaderProps> = ({
   yearsData,
   onResetData,
   onImportData,
-  onExportCSV,
+  user,
+  syncStatus,
+  onOpenAuth,
+  onLogout,
+  onForceSaveCloud,
+  onShowToast,
 }) => {
   const [showDataMenu, setShowDataMenu] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const globalMetrics = calculateGlobalMetrics(yearsData);
 
-  const handleExportJSON = () => {
-    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
-      JSON.stringify(yearsData, null, 2)
-    )}`;
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', jsonString);
-    downloadAnchor.setAttribute(
-      'download',
-      `cartera_inversiones_privada_${new Date().toISOString().slice(0, 10)}.json`
-    );
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+  const handleExportJSON = async () => {
     setShowDataMenu(false);
+    const res = await exportJSONFile(yearsData);
+    onShowToast(res.message);
+  };
+
+  const handleExportCSV = async () => {
+    setShowDataMenu(false);
+    const res = await exportCSVFile(yearsData);
+    onShowToast(res.message);
+  };
+
+  const handleCopyClipboard = async () => {
+    setShowDataMenu(false);
+    const ok = await copyJSONToClipboard(yearsData);
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      onShowToast('Copia de seguridad copiada al portapapeles');
+    } else {
+      onShowToast('No se pudo copiar al portapapeles');
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,9 +88,10 @@ export const Header: React.FC<HeaderProps> = ({
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target?.result as string);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           onImportData(parsed);
           setShowDataMenu(false);
+          onShowToast('Datos restaurados correctamente');
         } else {
           alert('El archivo no tiene el formato esperado de años de inversión.');
         }
@@ -75,22 +106,17 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md">
-      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-        <div className="flex h-14 sm:h-16 items-center justify-between gap-2 sm:gap-4">
+      <div className="mx-auto max-w-7xl px-2.5 sm:px-6 lg:px-8">
+        <div className="flex h-14 sm:h-16 items-center justify-between gap-1.5 sm:gap-4">
           {/* Brand and Title */}
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-slate-800 border border-slate-700 text-white shadow-xs">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-slate-800 border border-slate-700 text-white shadow-xs">
               <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400" />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-sm sm:text-base font-bold tracking-tight text-white truncate">
-                  Mis Inversiones
-                </h1>
-                <span className="hidden sm:inline-block rounded-full bg-emerald-950/80 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 border border-emerald-800/80">
-                  Privado
-                </span>
-              </div>
+              <h1 className="text-sm sm:text-base font-bold tracking-tight text-white truncate">
+                Mis Inversiones
+              </h1>
               <p className="hidden sm:block text-[11px] text-slate-400 truncate">
                 Control mensual de posiciones y patrimonio
               </p>
@@ -139,7 +165,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 id="tab-data-entry-btn"
                 onClick={() => setActiveTab('data')}
-                className={`flex items-center gap-1 sm:gap-1.5 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1 sm:gap-1.5 rounded-lg px-2 sm:px-3 py-1.5 text-xs font-semibold transition-all ${
                   activeTab === 'data'
                     ? 'bg-slate-800 text-white shadow-xs'
                     : 'text-slate-400 hover:text-white'
@@ -151,7 +177,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 id="tab-analytics-btn"
                 onClick={() => setActiveTab('analytics')}
-                className={`flex items-center gap-1 sm:gap-1.5 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1 sm:gap-1.5 rounded-lg px-2 sm:px-3 py-1.5 text-xs font-semibold transition-all ${
                   activeTab === 'analytics'
                     ? 'bg-indigo-600 text-white shadow-xs'
                     : 'text-slate-400 hover:text-indigo-400'
@@ -161,6 +187,88 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="text-[11px] sm:text-xs">Métricas</span>
               </button>
             </div>
+
+            {/* Cloud Auth & Status Button */}
+            {!user ? (
+              <button
+                id="login-btn-top"
+                onClick={onOpenAuth}
+                className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold shadow-xs transition cursor-pointer"
+                title="Sincronizar datos en la nube y compartir"
+              >
+                <Cloud className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Conectar Nube</span>
+                <span className="sm:hidden">Conectar</span>
+              </button>
+            ) : (
+              <div className="relative">
+                <button
+                  id="user-menu-btn"
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className={`flex items-center gap-1.5 rounded-xl border px-2.5 sm:px-3 py-1.5 text-xs font-semibold shadow-xs transition cursor-pointer ${
+                    syncStatus === 'syncing'
+                      ? 'border-amber-500/40 bg-amber-950/40 text-amber-300 hover:bg-amber-900/50'
+                      : 'border-emerald-500/40 bg-emerald-950/50 text-emerald-300 hover:bg-emerald-900/50'
+                  }`}
+                  title={`Conectado como ${user.email}. Clic para ver opciones.`}
+                >
+                  {syncStatus === 'syncing' ? (
+                    <CloudUpload className="h-3.5 w-3.5 animate-pulse text-amber-400" />
+                  ) : (
+                    <CloudCheck className="h-3.5 w-3.5 text-emerald-400" />
+                  )}
+                  <span>
+                    {syncStatus === 'syncing' ? 'Sincronizando...' : 'Conectado'}
+                  </span>
+                </button>
+
+                {showUserMenu && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-30"
+                      onClick={() => setShowUserMenu(false)}
+                    />
+                    <div className="absolute right-0 z-40 mt-2 w-64 rounded-2xl border border-slate-700 bg-slate-900 p-2.5 shadow-2xl animate-in fade-in zoom-in-95 duration-100">
+                      <div className="px-3 py-2 border-b border-slate-800">
+                        <p className="text-xs font-bold text-white truncate">
+                          {user.displayName || 'Mi Usuario'}
+                        </p>
+                        <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
+                        <div className="mt-2 flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium">
+                          <CloudCheck className="h-3.5 w-3.5" />
+                          <span>Sincronización en la Nube Activa</span>
+                        </div>
+                      </div>
+
+                      <div className="py-1">
+                        <button
+                          onClick={async () => {
+                            setShowUserMenu(false);
+                            await onForceSaveCloud();
+                            onShowToast('Cartera guardada en la Nube');
+                          }}
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 transition"
+                        >
+                          <CloudUpload className="h-3.5 w-3.5 text-indigo-400" />
+                          Guardar en la Nube Ahora
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            onLogout();
+                            onShowToast('Sesión cerrada');
+                          }}
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-rose-400 hover:bg-rose-950/40 transition"
+                        >
+                          <LogOut className="h-3.5 w-3.5 text-rose-400" />
+                          Cerrar Sesión
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Data Management Dropdown (JSON Backup, CSV, Import) */}
             <div className="relative">
@@ -182,36 +290,45 @@ export const Header: React.FC<HeaderProps> = ({
                   />
                   <div
                     id="data-dropdown-menu"
-                    className="absolute right-0 z-40 mt-2 w-60 rounded-2xl border border-slate-700 bg-slate-900 p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-100"
+                    className="absolute right-0 z-40 mt-2 w-64 rounded-2xl border border-slate-700 bg-slate-900 p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-100"
                   >
                     <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      Tus Datos (Guardados en móvil)
+                      Opciones de Datos y Descargas
                     </div>
                     <button
                       id="export-json-btn"
                       onClick={handleExportJSON}
                       className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 transition"
                     >
-                      <Download className="h-3.5 w-3.5 text-slate-400" />
+                      <Download className="h-3.5 w-3.5 text-indigo-400" />
                       Descargar Copia (JSON)
                     </button>
                     <button
                       id="export-csv-btn"
-                      onClick={() => {
-                        onExportCSV();
-                        setShowDataMenu(false);
-                      }}
+                      onClick={handleExportCSV}
                       className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 transition"
                     >
-                      <FileSpreadsheet className="h-3.5 w-3.5 text-slate-400" />
+                      <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-400" />
                       Descargar Excel / CSV
+                    </button>
+                    <button
+                      id="copy-clipboard-btn"
+                      onClick={handleCopyClipboard}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 transition"
+                    >
+                      {copied ? (
+                        <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5 text-slate-400" />
+                      )}
+                      Copiar JSON al Portapapeles
                     </button>
                     <button
                       id="import-json-btn"
                       onClick={() => fileInputRef.current?.click()}
                       className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 transition"
                     >
-                      <Upload className="h-3.5 w-3.5 text-slate-400" />
+                      <Upload className="h-3.5 w-3.5 text-amber-400" />
                       Restaurar Copia (JSON)
                     </button>
 
