@@ -1,0 +1,6 @@
+{
+  "name": "Gestor de Inversiones y Patrimonio",
+  "description": "Seguimiento mensual de inversiones por plataforma, control de capital acumulado y análisis integral de métricas de rendimiento.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
