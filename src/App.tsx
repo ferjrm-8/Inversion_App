@@ -441,14 +441,97 @@ export default function App() {
     showToast(`Posiciones traspasadas a ${MONTH_NAMES_ES[targetMonth - 1]} ${targetYear}`);
   };
 
+  // User Action: Delete entire year
+  const handleDeleteYear = (yearToDelete: number) => {
+    isLocallyModifiedRef.current = true;
+    setYearsData((prev) => {
+      const remaining = prev.filter((y) => y.year !== yearToDelete);
+      if (remaining.length === 0) {
+        const currentYr = new Date().getFullYear();
+        const emptyYear: YearData = {
+          year: currentYr,
+          months: Array.from({ length: 12 }, (_, i) => ({
+            id: `${currentYr}-${String(i + 1).padStart(2, '0')}`,
+            year: currentYr,
+            month: i + 1,
+            monthName: MONTH_NAMES_ES[i],
+            platforms: [],
+            hasData: false,
+            isClosed: false,
+          })),
+        };
+        setSelectedYear(currentYr);
+        setSelectedMonth(1);
+        return [emptyYear];
+      }
+      if (selectedYear === yearToDelete) {
+        const nextSelected = remaining[remaining.length - 1].year;
+        setSelectedYear(nextSelected);
+      }
+      return remaining;
+    });
+    showToast(`Año ${yearToDelete} eliminado`);
+  };
+
+  // User Action: Delete/clear single month
+  const handleDeleteMonth = (year: number, month: number) => {
+    isLocallyModifiedRef.current = true;
+    setYearsData((prev) =>
+      prev.map((y) => {
+        if (y.year !== year) return y;
+        return {
+          ...y,
+          months: y.months.map((m) => {
+            if (m.month !== month) return m;
+            return {
+              ...m,
+              platforms: [],
+              otherFunds: [],
+              notes: '',
+              hasData: false,
+              isClosed: false,
+            };
+          }),
+        };
+      })
+    );
+    showToast(`Datos de ${MONTH_NAMES_ES[month - 1]} ${year} eliminados`);
+  };
+
+  // User Action: Reset to generic demo initial template
   const handleResetData = () => {
     isLocallyModifiedRef.current = true;
     const key = getStorageKey(account?.userId);
     localStorage.removeItem(key);
     setYearsData(INITIAL_YEARS_DATA);
-    setSelectedYear(2026);
-    setSelectedMonth(9);
-    showToast('Datos reiniciados a la plantilla original');
+    const maxYear = Math.max(...INITIAL_YEARS_DATA.map((y) => y.year));
+    setSelectedYear(maxYear);
+    setSelectedMonth(1);
+    showToast('Datos de ejemplo cargados correctamente');
+  };
+
+  // User Action: Clear all data completely (empty portfolio)
+  const handleClearAllData = () => {
+    isLocallyModifiedRef.current = true;
+    const currentYr = new Date().getFullYear();
+    const cleanYear: YearData = {
+      year: currentYr,
+      months: Array.from({ length: 12 }, (_, i) => ({
+        id: `${currentYr}-${String(i + 1).padStart(2, '0')}`,
+        year: currentYr,
+        month: i + 1,
+        monthName: MONTH_NAMES_ES[i],
+        platforms: [],
+        hasData: false,
+        isClosed: false,
+      })),
+    };
+    setYearsData([cleanYear]);
+    setSelectedYear(currentYr);
+    setSelectedMonth(1);
+    const key = getStorageKey(account?.userId);
+    localStorage.setItem(key, JSON.stringify([cleanYear]));
+    showToast('Cartera vaciada. Puedes empezar a registrar datos desde cero.');
   };
 
   const handleImportData = (imported: YearData[]) => {
@@ -481,12 +564,13 @@ export default function App() {
       )}
 
       {/* Top Navigation & Header */}
-      <div className="relative z-10">
+      <div className="relative z-40">
         <Header
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           yearsData={yearsData}
           onResetData={handleResetData}
+          onClearAllData={handleClearAllData}
           onImportData={handleImportData}
           account={account}
           syncStatus={syncStatus}
@@ -511,6 +595,8 @@ export default function App() {
             onUpdateMonthData={handleUpdateMonthData}
             onToggleMonthStatus={handleToggleMonthStatus}
             onAddNewYear={handleAddNewYear}
+            onDeleteYear={handleDeleteYear}
+            onDeleteMonth={handleDeleteMonth}
             onRolloverToNextMonth={handleRolloverToNextMonth}
           />
         ) : (

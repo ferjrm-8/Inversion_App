@@ -20,6 +20,8 @@ import {
   Copy,
   Check,
   RefreshCw,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import { UserAccount, YearData } from '../types/investment';
 import { calculateGlobalMetrics, formatEuro } from '../utils/calculations';
@@ -30,6 +32,7 @@ interface HeaderProps {
   setActiveTab: (tab: 'data' | 'analytics') => void;
   yearsData: YearData[];
   onResetData: () => void;
+  onClearAllData: () => void;
   onImportData: (imported: YearData[]) => void;
   account: UserAccount | null;
   syncStatus: 'synced' | 'syncing' | 'offline' | 'local';
@@ -46,6 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
   setActiveTab,
   yearsData,
   onResetData,
+  onClearAllData,
   onImportData,
   account,
   syncStatus,
@@ -58,6 +62,9 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [showDataMenu, setShowDataMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showClearAllModal, setShowClearAllModal] = useState(false);
+  const [clearConfirmationText, setClearConfirmationText] = useState('');
+  const [showResetDemoModal, setShowResetDemoModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isManualSyncing, setIsManualSyncing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -213,10 +220,10 @@ export const Header: React.FC<HeaderProps> = ({
                 {showUserMenu && (
                   <>
                     <div
-                      className="fixed inset-0 z-30"
+                      className="fixed inset-0 z-40"
                       onClick={() => setShowUserMenu(false)}
                     />
-                    <div className="absolute right-0 z-40 mt-2 w-72 rounded-2xl border border-slate-700 bg-slate-900/95 p-3 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100">
+                    <div className="absolute right-0 z-50 mt-2 w-72 rounded-2xl border border-slate-700 bg-slate-900/95 p-3 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100">
                       <div className="px-3 py-2 border-b border-slate-800">
                         <p className="text-xs font-bold text-white truncate">
                           {account.displayName}
@@ -296,10 +303,10 @@ export const Header: React.FC<HeaderProps> = ({
               {showDataMenu && (
                 <>
                   <div
-                    className="fixed inset-0 z-30"
+                    className="fixed inset-0 z-40"
                     onClick={() => setShowDataMenu(false)}
                   />
-                  <div className="absolute right-0 z-40 mt-2 w-56 rounded-2xl border border-slate-700 bg-slate-900/95 p-2 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100">
+                  <div className="absolute right-0 z-50 mt-2 w-56 rounded-2xl border border-slate-700 bg-slate-900/95 p-2 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100">
                     <button
                       id="export-json-btn"
                       onClick={handleExportJSON}
@@ -347,24 +354,45 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                       id="reset-data-btn"
                       onClick={() => {
-                        if (
-                          window.confirm(
-                            '¿Estás seguro de que deseas reiniciar todos los datos a la plantilla inicial?'
-                          )
-                        ) {
-                          onResetData();
-                          setShowDataMenu(false);
-                        }
+                        setShowDataMenu(false);
+                        setShowResetDemoModal(true);
+                      }}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-amber-300 hover:bg-amber-950/40 transition cursor-pointer"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5 text-amber-400" />
+                      Cargar datos de ejemplo
+                    </button>
+
+                    <button
+                      id="clear-all-data-btn"
+                      onClick={() => {
+                        setShowDataMenu(false);
+                        setClearConfirmationText('');
+                        setShowClearAllModal(true);
                       }}
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-rose-400 hover:bg-rose-950/40 transition cursor-pointer"
                     >
-                      <RotateCcw className="h-3.5 w-3.5 text-rose-400" />
-                      Reiniciar a plantilla
+                      <Trash2 className="h-3.5 w-3.5 text-rose-400" />
+                      Borrar todos los datos
                     </button>
                   </div>
                 </>
               )}
             </div>
+
+            {/* Direct Header Button: Borrar Todo */}
+            <button
+              id="header-direct-clear-all-btn"
+              onClick={() => {
+                setClearConfirmationText('');
+                setShowClearAllModal(true);
+              }}
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-900/80 bg-rose-950/60 hover:bg-rose-900/90 text-rose-300 hover:text-white px-2.5 py-1.5 text-xs font-semibold shadow-md transition cursor-pointer backdrop-blur-md"
+              title="Borrar todos los datos y empezar de cero"
+            >
+              <Trash2 className="h-3.5 w-3.5 text-rose-400" />
+              <span className="hidden sm:inline">Borrar todo</span>
+            </button>
 
             {/* Hidden file input for JSON import */}
             <input
@@ -461,6 +489,124 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal: Borrar todos los datos con máxima seguridad */}
+      {showClearAllModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 p-3 sm:p-4 backdrop-blur-md flex items-center justify-center min-h-screen animate-in fade-in duration-150">
+          <div className="relative w-full max-w-md my-auto rounded-2xl border border-rose-500/40 bg-slate-950 p-4 sm:p-5 shadow-2xl ring-1 ring-rose-500/30 text-white max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center gap-2.5 text-rose-400 mb-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-950/90 border border-rose-700/80 text-rose-400 shrink-0">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-rose-200">¿Vaciar y borrar toda la cartera?</h3>
+                <p className="text-[10px] sm:text-[11px] text-rose-400/90 font-medium">Acción irreversible de borrado total</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed mb-3">
+              Esta acción eliminará todos los registros, años, meses, plataformas y fondos de tu dispositivo para dejar la aplicación <strong>100% en blanco y limpia</strong> para un nuevo usuario.
+            </p>
+
+            {/* Safety Backup CTA */}
+            <div className="rounded-xl border border-purple-500/30 bg-purple-950/20 p-2.5 mb-3 flex items-center justify-between gap-2.5">
+              <div className="text-[11px] text-purple-200">
+                <p className="font-semibold text-purple-300">¿Guardar copia antes?</p>
+                <p className="text-slate-400 text-[10px]">Descarga tus datos en un archivo JSON.</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleExportJSON}
+                className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-900/50 hover:bg-purple-800/60 px-2.5 py-1.5 text-xs font-semibold text-purple-200 transition cursor-pointer"
+              >
+                <Download className="h-3.5 w-3.5 text-purple-300" />
+                <span>Backup JSON</span>
+              </button>
+            </div>
+
+            {/* Word verification */}
+            <div className="mb-4 space-y-1">
+              <label className="block text-xs font-semibold text-slate-200">
+                Para confirmar, escribe la palabra <span className="font-mono text-rose-400 font-bold tracking-wider">BORRAR</span>:
+              </label>
+              <input
+                type="text"
+                autoFocus
+                value={clearConfirmationText}
+                onChange={(e) => setClearConfirmationText(e.target.value)}
+                placeholder="Escribe BORRAR aquí"
+                className="w-full rounded-xl border border-slate-700 bg-slate-900/90 px-3 py-2 text-sm text-white font-mono placeholder-slate-500 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 focus:outline-hidden"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowClearAllModal(false);
+                  setClearConfirmationText('');
+                }}
+                className="rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 cursor-pointer transition"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={clearConfirmationText.trim().toUpperCase() !== 'BORRAR'}
+                onClick={() => {
+                  onClearAllData();
+                  setShowClearAllModal(false);
+                  setClearConfirmationText('');
+                }}
+                className={`rounded-xl px-3.5 py-2 text-xs font-bold text-white shadow-lg transition flex items-center gap-1.5 ${
+                  clearConfirmationText.trim().toUpperCase() === 'BORRAR'
+                    ? 'bg-rose-600 hover:bg-rose-500 shadow-rose-600/30 cursor-pointer'
+                    : 'bg-rose-950/60 text-slate-500 border border-rose-900/40 opacity-50 cursor-not-allowed'
+                }`}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Confirmar y Borrar Todo</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal: Restablecer datos de ejemplo */}
+      {showResetDemoModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 p-3 sm:p-4 backdrop-blur-md flex items-center justify-center min-h-screen animate-in fade-in duration-150">
+          <div className="relative w-full max-w-md my-auto rounded-2xl border border-amber-500/30 bg-slate-950 p-4 sm:p-5 shadow-2xl ring-1 ring-amber-500/20 text-white max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center gap-2.5 text-amber-400 mb-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-950/80 border border-amber-800/80 text-amber-400 shrink-0">
+                <RotateCcw className="h-4 w-4" />
+              </div>
+              <h3 className="text-sm sm:text-base font-bold">¿Cargar datos de ejemplo?</h3>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed mb-4">
+              Se restaurará la cartera de muestra genérica de prueba para explorar las métricas y gráficos de la aplicación.
+            </p>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowResetDemoModal(false)}
+                className="rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 cursor-pointer transition"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onResetData();
+                  setShowResetDemoModal(false);
+                }}
+                className="rounded-xl bg-amber-600 hover:bg-amber-500 px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-amber-600/30 cursor-pointer transition"
+              >
+                Cargar datos de ejemplo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

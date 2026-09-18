@@ -78,8 +78,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="relative w-full max-w-md rounded-2xl border border-slate-700/80 bg-slate-900/95 p-5 sm:p-6 shadow-2xl text-slate-100 max-h-[92vh] overflow-y-auto backdrop-blur-2xl">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 min-h-screen animate-in fade-in duration-150">
+      <div className="relative w-full max-w-md my-auto rounded-2xl border border-slate-700/80 bg-slate-900/95 p-4 sm:p-6 shadow-2xl text-slate-100 max-h-[92vh] overflow-y-auto backdrop-blur-2xl">
         <button
           onClick={onClose}
           className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition cursor-pointer"
@@ -152,7 +152,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Ej. Fernando"
+                  placeholder="Ej. Mi Inversor"
                   className="w-full rounded-xl border border-slate-700 bg-slate-950 py-2 pl-9 pr-3 text-sm text-white placeholder-slate-500 focus:border-purple-500 focus:outline-hidden focus:ring-1 focus:ring-purple-500"
                 />
               </div>
@@ -171,7 +171,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 autoFocus
                 value={emailOrUser}
                 onChange={(e) => setEmailOrUser(e.target.value)}
-                placeholder="Ej. ferjrm@gmail.com o fernando"
+                placeholder="Ej. usuario@correo.com o mi_usuario"
                 className="w-full rounded-xl border border-slate-700 bg-slate-950 py-2 pl-9 pr-3 text-sm text-white placeholder-slate-500 focus:border-purple-500 focus:outline-hidden focus:ring-1 focus:ring-purple-500"
               />
             </div>

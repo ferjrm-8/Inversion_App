@@ -39,6 +39,8 @@ interface DataEntryTabProps {
   ) => void;
   onToggleMonthStatus: (year: number, month: number, newClosedStatus: boolean) => void;
   onAddNewYear: () => void;
+  onDeleteYear: (year: number) => void;
+  onDeleteMonth: (year: number, month: number) => void;
   onRolloverToNextMonth: (
     sourceYear: number,
     sourceMonth: number,
@@ -63,9 +65,13 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
   onUpdateMonthData,
   onToggleMonthStatus,
   onAddNewYear,
+  onDeleteYear,
+  onDeleteMonth,
   onRolloverToNextMonth,
 }) => {
   const [showRolloverModal, setShowRolloverModal] = useState(false);
+  const [showDeleteYearModal, setShowDeleteYearModal] = useState(false);
+  const [showDeleteMonthModal, setShowDeleteMonthModal] = useState(false);
   const [rolloverMode, setRolloverMode] = useState<'use_valuation' | 'keep_invested'>('keep_invested');
 
   // Quick add platform form state
@@ -227,15 +233,27 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
           ))}
         </div>
 
-        <button
-          id="add-new-year-btn"
-          onClick={onAddNewYear}
-          className="shrink-0 inline-flex items-center gap-1 rounded-xl border border-dashed border-slate-700 bg-slate-800/60 px-2.5 py-1.5 text-[11px] sm:text-xs font-semibold text-slate-300 hover:border-purple-500 hover:text-white transition"
-          title="Añadir siguiente año"
-        >
-          <Plus className="h-3.5 w-3.5 text-purple-400" />
-          <span className="hidden xs:inline">+ Año</span>
-        </button>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            id="add-new-year-btn"
+            onClick={onAddNewYear}
+            className="shrink-0 inline-flex items-center gap-1 rounded-xl border border-dashed border-slate-700 bg-slate-800/60 px-2.5 py-1.5 text-[11px] sm:text-xs font-semibold text-slate-300 hover:border-purple-500 hover:text-white transition cursor-pointer"
+            title="Añadir siguiente año"
+          >
+            <Plus className="h-3.5 w-3.5 text-purple-400" />
+            <span className="hidden xs:inline">+ Año</span>
+          </button>
+
+          <button
+            id="delete-year-btn"
+            onClick={() => setShowDeleteYearModal(true)}
+            className="shrink-0 inline-flex items-center gap-1 rounded-xl border border-dashed border-rose-900/60 bg-rose-950/30 px-2.5 py-1.5 text-[11px] sm:text-xs font-semibold text-rose-300 hover:border-rose-500 hover:bg-rose-950/60 hover:text-white transition cursor-pointer"
+            title={`Eliminar año ${selectedYear}`}
+          >
+            <Trash2 className="h-3.5 w-3.5 text-rose-400" />
+            <span className="hidden xs:inline">Borrar Año</span>
+          </button>
+        </div>
       </div>
 
       {/* Month Selector Carousel */}
@@ -372,16 +390,28 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
             </div>
           </div>
 
-          {/* Rollover CTA */}
-          <button
-            id="open-rollover-modal-btn"
-            onClick={() => setShowRolloverModal(true)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-purple-600 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs font-bold text-white shadow-xs hover:bg-purple-500 active:scale-98 transition"
-          >
-            <Sparkles className="h-4 w-4" />
-            <span>Traspasar y Cerrar hacia {nextMonthName}</span>
-            <ChevronRight className="h-3.5 w-3.5" />
-          </button>
+          {/* Actions CTA: Perfectly aligned in a single horizontal row with equal height */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button
+              id="delete-month-btn"
+              onClick={() => setShowDeleteMonthModal(true)}
+              className="h-10 inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-900/70 bg-rose-950/40 px-3.5 text-xs font-semibold text-rose-300 hover:bg-rose-900/60 hover:border-rose-500 hover:text-white shadow-sm transition cursor-pointer"
+              title={`Vaciar datos de ${currentMonthData.monthName} ${selectedYear}`}
+            >
+              <Trash2 className="h-4 w-4 text-rose-400" />
+              <span>Borrar mes</span>
+            </button>
+
+            <button
+              id="open-rollover-modal-btn"
+              onClick={() => setShowRolloverModal(true)}
+              className="h-10 inline-flex items-center justify-center gap-2 rounded-xl bg-purple-600 hover:bg-purple-500 px-4 text-xs font-bold text-white shadow-md shadow-purple-600/30 active:scale-98 transition cursor-pointer"
+            >
+              <Sparkles className="h-4 w-4" />
+              <span>Traspasar a {nextMonthName}</span>
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {/* 4 Metric Cards for Selected Month */}
@@ -982,14 +1012,14 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
       {showRolloverModal && (
         <div
           id="rollover-modal-backdrop"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/85 p-3 sm:p-4 backdrop-blur-md flex items-center justify-center min-h-screen animate-in fade-in duration-150"
         >
           <div
             id="rollover-modal-card"
-            className="w-full max-w-md rounded-2xl bg-slate-900 p-5 sm:p-6 shadow-2xl border border-slate-800 text-slate-200"
+            className="relative w-full max-w-md my-auto rounded-2xl bg-slate-900 p-4 sm:p-6 shadow-2xl border border-slate-800 text-slate-200 max-h-[92vh] overflow-y-auto"
           >
             <div className="flex items-center gap-3 pb-3 border-b border-slate-800">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-950 border border-purple-800 text-purple-400">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-950 border border-purple-800 text-purple-400 shrink-0">
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
@@ -1056,20 +1086,92 @@ export const DataEntryTab: React.FC<DataEntryTabProps> = ({
               </label>
             </div>
 
-            <div className="mt-6 flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+            <div className="mt-5 flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
               <button
                 id="cancel-rollover-btn"
                 onClick={() => setShowRolloverModal(false)}
-                className="rounded-xl border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition"
+                className="rounded-xl border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 id="confirm-rollover-btn"
                 onClick={handleExecuteRollover}
-                className="rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white hover:bg-purple-500 transition"
+                className="rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white hover:bg-purple-500 shadow-md shadow-purple-600/30 transition cursor-pointer"
               >
                 Confirmar y Traspasar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal: Delete Year */}
+      {showDeleteYearModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 p-3 sm:p-4 backdrop-blur-md flex items-center justify-center min-h-screen animate-in fade-in duration-150">
+          <div className="relative w-full max-w-md my-auto rounded-2xl border border-rose-500/30 bg-slate-950 p-4 sm:p-5 shadow-2xl ring-1 ring-rose-500/20 text-white max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center gap-2.5 text-rose-400 mb-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-950/80 border border-rose-800/80 text-rose-400 shrink-0">
+                <Trash2 className="h-4 w-4" />
+              </div>
+              <h3 className="text-sm sm:text-base font-bold">¿Eliminar el año {selectedYear}?</h3>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed mb-4">
+              Se eliminarán todos los 12 meses y las plataformas registradas para el año <strong>{selectedYear}</strong>. Esta acción no se puede deshacer.
+            </p>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowDeleteYearModal(false)}
+                className="rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 cursor-pointer transition"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onDeleteYear(selectedYear);
+                  setShowDeleteYearModal(false);
+                }}
+                className="rounded-xl bg-rose-600 hover:bg-rose-500 px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-rose-600/30 cursor-pointer transition"
+              >
+                Sí, eliminar año
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal: Delete Month Data */}
+      {showDeleteMonthModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 p-3 sm:p-4 backdrop-blur-md flex items-center justify-center min-h-screen animate-in fade-in duration-150">
+          <div className="relative w-full max-w-md my-auto rounded-2xl border border-rose-500/30 bg-slate-950 p-4 sm:p-5 shadow-2xl ring-1 ring-rose-500/20 text-white max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center gap-2.5 text-rose-400 mb-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-950/80 border border-rose-800/80 text-rose-400 shrink-0">
+                <Trash2 className="h-4 w-4" />
+              </div>
+              <h3 className="text-sm sm:text-base font-bold">¿Vaciar datos de {currentMonthData.monthName} {selectedYear}?</h3>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed mb-4">
+              Se borrarán todas las plataformas, fondos adicionales y notas correspondientes a <strong>{currentMonthData.monthName} {selectedYear}</strong>.
+            </p>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowDeleteMonthModal(false)}
+                className="rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 cursor-pointer transition"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onDeleteMonth(selectedYear, selectedMonth);
+                  setShowDeleteMonthModal(false);
+                }}
+                className="rounded-xl bg-rose-600 hover:bg-rose-500 px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-rose-600/30 cursor-pointer transition"
+              >
+                Sí, vaciar mes
               </button>
             </div>
           </div>
