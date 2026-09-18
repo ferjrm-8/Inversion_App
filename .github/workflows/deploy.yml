@@ -21,16 +21,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
+          bun-version: latest
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: bun install
 
       - name: Build production app
-        run: npm run build
+        run: bun run build
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
@@ -43,3 +43,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
