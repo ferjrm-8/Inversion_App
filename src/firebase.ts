@@ -6,6 +6,17 @@ import {
   setDoc,
   onSnapshot,
 } from 'firebase/firestore';
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  onAuthStateChanged,
+  User,
+  updateProfile,
+} from 'firebase/auth';
 import firebaseConfig from '../firebase-applet-config.json';
 import { CloudAccount, YearData } from './types/investment';
 
@@ -20,6 +31,8 @@ export const app = initializeApp({
 });
 
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId || '(default)');
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
 
 const ACTIVE_ACCOUNT_STORAGE_KEY = 'mis_inversiones_active_cloud_account_v2';
 
@@ -158,4 +171,29 @@ export function subscribePortfolioFromCloud(
       if (onError) onError(err);
     }
   );
+}
+
+/**
+ * Firebase Auth standard helpers
+ */
+export async function registerWithEmail(email: string, pass: string, name?: string): Promise<User> {
+  const cred = await createUserWithEmailAndPassword(auth, email.trim(), pass);
+  if (name && cred.user) {
+    await updateProfile(cred.user, { displayName: name.trim() });
+  }
+  return cred.user;
+}
+
+export async function loginWithEmail(email: string, pass: string): Promise<User> {
+  const cred = await signInWithEmailAndPassword(auth, email.trim(), pass);
+  return cred.user;
+}
+
+export async function loginWithGoogle(): Promise<User> {
+  const cred = await signInWithPopup(auth, googleProvider);
+  return cred.user;
+}
+
+export async function logoutFirebaseAuth(): Promise<void> {
+  await signOut(auth);
 }
