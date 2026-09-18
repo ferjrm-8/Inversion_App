@@ -1,16 +1,5 @@
 import { initializeApp } from 'firebase/app';
 import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  User,
-  GoogleAuthProvider,
-  signInWithPopup,
-  updateProfile,
-} from 'firebase/auth';
-import {
   getFirestore,
   doc,
   getDoc,
@@ -18,9 +7,9 @@ import {
   onSnapshot,
 } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
-import { YearData } from './types/investment';
+import { CloudAccount, YearData } from './types/investment';
 
-// Initialize Firebase
+// Initialize Firebase App
 export const app = initializeApp({
   apiKey: firebaseConfig.apiKey,
   authDomain: firebaseConfig.authDomain,
@@ -30,76 +19,130 @@ export const app = initializeApp({
   appId: firebaseConfig.appId,
 });
 
-export const auth = getAuth(app);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId || '(default)');
 
-// Google Provider
-const googleProvider = new GoogleAuthProvider();
+const ACTIVE_ACCOUNT_STORAGE_KEY = 'mis_inversiones_active_cloud_account_v2';
 
-export const loginWithGoogle = async () => {
-  return signInWithPopup(auth, googleProvider);
-};
+/**
+ * Normalizes an account identifier or email to be a safe Firestore doc ID
+ */
+export function normalizeAccountId(input: string): string {
+  if (!input) return 'default';
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/[@.]/g, '-')
+    .replace(/[^a-z0-9_-]/g, '')
+    .slice(0, 64) || 'usuario';
+}
 
-export const logoutUser = async () => {
-  return signOut(auth);
-};
-
-export const loginWithEmail = async (email: string, pass: string) => {
-  return signInWithEmailAndPassword(auth, email, pass);
-};
-
-export const registerWithEmail = async (email: string, pass: string, name?: string) => {
-  const cred = await createUserWithEmailAndPassword(auth, email, pass);
-  if (name && cred.user) {
-    await updateProfile(cred.user, { displayName: name });
-  }
-  return cred;
-};
-
-// Save user portfolio to Firestore
-export const saveUserPortfolio = async (userId: string, yearsData: YearData[]) => {
+/**
+ * Local stored account helpers
+ */
+export function getStoredAccount(): CloudAccount | null {
   try {
-    const docRef = doc(db, 'users', userId, 'portfolio', 'data');
-    await setDoc(
-      docRef,
-      {
-        yearsData,
-        updatedAt: new Date().toISOString(),
-      },
-      { merge: true }
-    );
+    const raw = localStorage.getItem(ACTIVE_ACCOUNT_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as CloudAccount;
+  } catch (e) {
+    console.warn('Error reading stored cloud account', e);
+    return null;
+  }
+}
+
+export function setStoredAccount(account: CloudAccount): void {
+  try {
+    localStorage.setItem(ACTIVE_ACCOUNT_STORAGE_KEY, JSON.stringify(account));
+  } catch (e) {
+    console.error('Error saving active cloud account', e);
+  }
+}
+
+export function clearStoredAccount(): void {
+  try {
+    localStorage.removeItem(ACTIVE_ACCOUNT_STORAGE_KEY);
+  } catch (e) {
+    console.error('Error clearing cloud account', e);
+  }
+}
+
+/**
+ * Saves a portfolio dataset directly to Firestore for the given account
+ */
+export async function savePortfolioToCloud(
+  rawAccountId: string,
+  yearsData: YearData[],
+  displayName?: string,
+  pin?: string
+): Promise<boolean> {
+  try {
+    const accountId = normalizeAccountId(rawAccountId);
+    const docRef = doc(db, 'portfolios', accountId);
+
+    const payload: {
+      accountId: string;
+      displayName: string;
+      yearsData: YearData[];
+      updatedAt: string;
+      pin?: string;
+    } = {
+      accountId,
+      displayName: displayName || rawAccountId,
+      yearsData,
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (pin && pin.trim()) {
+      payload.pin = pin.trim();
+    }
+
+    await setDoc(docRef, payload, { merge: true });
     return true;
   } catch (error) {
     console.error('Error saving portfolio to Firestore:', error);
     throw error;
   }
-};
+}
 
-// Load user portfolio from Firestore
-export const loadUserPortfolio = async (userId: string): Promise<YearData[] | null> => {
+/**
+ * Loads a portfolio dataset from Firestore
+ */
+export async function loadPortfolioFromCloud(
+  rawAccountId: string
+): Promise<{ yearsData: YearData[]; displayName?: string; pin?: string } | null> {
   try {
-    const docRef = doc(db, 'users', userId, 'portfolio', 'data');
+    const accountId = normalizeAccountId(rawAccountId);
+    const docRef = doc(db, 'portfolios', accountId);
     const snap = await getDoc(docRef);
+
     if (snap.exists()) {
       const data = snap.data();
       if (Array.isArray(data.yearsData) && data.yearsData.length > 0) {
-        return data.yearsData as YearData[];
+        return {
+          yearsData: data.yearsData as YearData[],
+          displayName: data.displayName || rawAccountId,
+          pin: data.pin,
+        };
       }
     }
     return null;
   } catch (error) {
     console.error('Error loading portfolio from Firestore:', error);
-    return null;
+    throw error;
   }
-};
+}
 
-// Subscribe to real-time updates from Firestore
-export const subscribeUserPortfolio = (
-  userId: string,
+/**
+ * Real-time listener for Firestore portfolio changes
+ */
+export function subscribePortfolioFromCloud(
+  rawAccountId: string,
   onData: (yearsData: YearData[]) => void,
   onError?: (err: Error) => void
-) => {
-  const docRef = doc(db, 'users', userId, 'portfolio', 'data');
+) {
+  const accountId = normalizeAccountId(rawAccountId);
+  const docRef = doc(db, 'portfolios', accountId);
+
   return onSnapshot(
     docRef,
     (snap) => {
@@ -115,4 +158,4 @@ export const subscribeUserPortfolio = (
       if (onError) onError(err);
     }
   );
-};
+}

@@ -42,3 +42,11 @@ export interface InvestmentStore {
   selectedMonth: number;
   customPlatforms: string[];
 }
+
+export interface CloudAccount {
+  accountId: string;
+  displayName: string;
+  pin?: string;
+  lastSyncedAt?: string;
+}
+

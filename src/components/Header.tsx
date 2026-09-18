@@ -17,8 +17,7 @@ import {
   Copy,
   Check,
 } from 'lucide-react';
-import { User } from 'firebase/auth';
-import { YearData } from '../types/investment';
+import { CloudAccount, YearData } from '../types/investment';
 import { calculateGlobalMetrics, formatEuro } from '../utils/calculations';
 import { exportJSONFile, exportCSVFile, copyJSONToClipboard } from '../utils/exportUtils';
 
@@ -28,7 +27,7 @@ interface HeaderProps {
   yearsData: YearData[];
   onResetData: () => void;
   onImportData: (imported: YearData[]) => void;
-  user: User | null;
+  account: CloudAccount | null;
   syncStatus: 'synced' | 'syncing' | 'offline' | 'local';
   onOpenAuth: () => void;
   onLogout: () => void;
@@ -42,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
   yearsData,
   onResetData,
   onImportData,
-  user,
+  account,
   syncStatus,
   onOpenAuth,
   onLogout,
@@ -189,7 +188,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
 
             {/* Cloud Auth & Status Button */}
-            {!user ? (
+            {!account ? (
               <button
                 id="login-btn-top"
                 onClick={onOpenAuth}
@@ -210,7 +209,7 @@ export const Header: React.FC<HeaderProps> = ({
                       ? 'border-amber-500/40 bg-amber-950/40 text-amber-300 hover:bg-amber-900/50'
                       : 'border-emerald-500/40 bg-emerald-950/50 text-emerald-300 hover:bg-emerald-900/50'
                   }`}
-                  title={`Conectado como ${user.email}. Clic para ver opciones.`}
+                  title={`Conectado como ${account.displayName}. Clic para ver opciones.`}
                 >
                   {syncStatus === 'syncing' ? (
                     <CloudUpload className="h-3.5 w-3.5 animate-pulse text-amber-400" />
@@ -218,7 +217,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <CloudCheck className="h-3.5 w-3.5 text-emerald-400" />
                   )}
                   <span>
-                    {syncStatus === 'syncing' ? 'Sincronizando...' : 'Conectado'}
+                    {syncStatus === 'syncing' ? 'Guardando...' : 'Conectado'}
                   </span>
                 </button>
 
@@ -231,12 +230,12 @@ export const Header: React.FC<HeaderProps> = ({
                     <div className="absolute right-0 z-40 mt-2 w-64 rounded-2xl border border-slate-700 bg-slate-900 p-2.5 shadow-2xl animate-in fade-in zoom-in-95 duration-100">
                       <div className="px-3 py-2 border-b border-slate-800">
                         <p className="text-xs font-bold text-white truncate">
-                          {user.displayName || 'Mi Usuario'}
+                          {account.displayName}
                         </p>
-                        <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
+                        <p className="text-[11px] text-slate-400 truncate">ID: {account.accountId}</p>
                         <div className="mt-2 flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium">
                           <CloudCheck className="h-3.5 w-3.5" />
-                          <span>Sincronización en la Nube Activa</span>
+                          <span>Autoguardado en tiempo real activo</span>
                         </div>
                       </div>
 
@@ -247,7 +246,7 @@ export const Header: React.FC<HeaderProps> = ({
                             await onForceSaveCloud();
                             onShowToast('Cartera guardada en la Nube');
                           }}
-                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 transition"
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 transition cursor-pointer"
                         >
                           <CloudUpload className="h-3.5 w-3.5 text-indigo-400" />
                           Guardar en la Nube Ahora
@@ -256,12 +255,12 @@ export const Header: React.FC<HeaderProps> = ({
                           onClick={() => {
                             setShowUserMenu(false);
                             onLogout();
-                            onShowToast('Sesión cerrada');
+                            onShowToast('Desconectado de la Nube');
                           }}
-                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-rose-400 hover:bg-rose-950/40 transition"
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-rose-400 hover:bg-rose-950/40 transition cursor-pointer"
                         >
                           <LogOut className="h-3.5 w-3.5 text-rose-400" />
-                          Cerrar Sesión
+                          Desconectar Nube
                         </button>
                       </div>
                     </div>
