@@ -9,6 +9,7 @@ import {
   getStoredUserSession,
   clearStoredUserSession,
   savePortfolioToCloud,
+  loadPortfolioFromCloud,
   subscribePortfolioFromCloud,
 } from './firebase';
 
@@ -19,8 +20,9 @@ export default function App() {
   const [account, setAccount] = useState<UserAccount | null>(() => getStoredUserSession());
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'offline' | 'local'>(
-    account ? 'synced' : 'local'
+    account ? 'syncing' : 'local'
   );
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [yearsData, setYearsData] = useState<YearData[]>(() => {
@@ -35,7 +37,7 @@ export default function App() {
         }
       }
     } catch (e) {
-      console.warn('Error reading from localStorage, using initial dataset', e);
+      console.warn('Error reading from localStorage', e);
     }
     return INITIAL_YEARS_DATA;
   });
@@ -44,6 +46,9 @@ export default function App() {
   const [selectedYear, setSelectedYear] = useState<number>(2026);
   const [selectedMonth, setSelectedMonth] = useState<number>(9);
 
+  // Guards to prevent race conditions and accidental overwrites
+  const isInitializedFromCloudRef = useRef(false);
+  const isLocallyModifiedRef = useRef(false);
   const isReceivingCloudDataRef = useRef(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -54,63 +59,93 @@ export default function App() {
     }, 3500);
   }, []);
 
-  // Multi-device real-time subscription when user is logged in
+  // 1. Initial Cloud Load when user account is active or changes
   useEffect(() => {
     if (!account) {
       setSyncStatus('local');
+      isInitializedFromCloudRef.current = false;
+      isLocallyModifiedRef.current = false;
       return;
     }
 
+    let isMounted = true;
     setSyncStatus('syncing');
 
-    // Load local cached version for instant UX
-    const storageKey = getStorageKey(account.userId);
-    const cached = localStorage.getItem(storageKey);
-    if (cached) {
+    async function initialFetch() {
+      if (!account) return;
       try {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]?.months) {
-          setYearsData(parsed);
+        const cloudResult = await loadPortfolioFromCloud(account.userId);
+        if (!isMounted) return;
+
+        const storageKey = getStorageKey(account.userId);
+
+        if (cloudResult && cloudResult.yearsData && cloudResult.yearsData.length > 0) {
+          // Cloud has data: ALWAYS prioritize and update state from cloud!
+          setYearsData(cloudResult.yearsData);
+          try {
+            localStorage.setItem(storageKey, JSON.stringify(cloudResult.yearsData));
+          } catch (e) {
+            console.warn(e);
+          }
+          const maxYear = Math.max(...cloudResult.yearsData.map((y) => y.year));
+          setSelectedYear(maxYear);
+          setLastSyncedAt(new Date().toLocaleTimeString());
+          showToast(`Datos actualizados desde la nube (${account.displayName})`);
+        } else {
+          // New account with no data in cloud yet: upload initial template
+          await savePortfolioToCloud(account.userId, yearsData, account.displayName);
+          setLastSyncedAt(new Date().toLocaleTimeString());
         }
-      } catch (e) {
-        console.warn('Error loading cached account data', e);
+
+        isInitializedFromCloudRef.current = true;
+        isLocallyModifiedRef.current = false;
+        setSyncStatus('synced');
+      } catch (err) {
+        console.error('Initial cloud fetch error:', err);
+        if (!isMounted) return;
+        setSyncStatus('offline');
+        isInitializedFromCloudRef.current = true; // Allow local offline edits
       }
     }
 
+    initialFetch();
+
+    // 2. Real-time Subscription for changes pushed from OTHER devices
     const unsubscribe = subscribePortfolioFromCloud(
       account.userId,
-      (cloudData) => {
-        if (cloudData && Array.isArray(cloudData) && cloudData.length > 0) {
-          isReceivingCloudDataRef.current = true;
-          setYearsData(cloudData);
-          try {
-            localStorage.setItem(storageKey, JSON.stringify(cloudData));
-          } catch (e) {
-            console.warn('Local storage write warning', e);
+      (incomingCloudData) => {
+        if (!isMounted) return;
+        if (incomingCloudData && Array.isArray(incomingCloudData) && incomingCloudData.length > 0) {
+          // If the user isn't actively editing on this device, sync the latest incoming data
+          if (!isLocallyModifiedRef.current) {
+            isReceivingCloudDataRef.current = true;
+            setYearsData(incomingCloudData);
+            const storageKey = getStorageKey(account.userId);
+            try {
+              localStorage.setItem(storageKey, JSON.stringify(incomingCloudData));
+            } catch (e) {
+              console.warn(e);
+            }
+            setLastSyncedAt(new Date().toLocaleTimeString());
+            setSyncStatus('synced');
+            setTimeout(() => {
+              isReceivingCloudDataRef.current = false;
+            }, 400);
           }
-          setSyncStatus('synced');
-          setTimeout(() => {
-            isReceivingCloudDataRef.current = false;
-          }, 400);
         }
       },
       (err) => {
-        console.error('Subscription error:', err);
-        setSyncStatus('offline');
-        isReceivingCloudDataRef.current = false;
+        console.warn('Real-time subscription error:', err);
       }
     );
 
-    setTimeout(() => {
-      setSyncStatus('synced');
-    }, 600);
-
     return () => {
+      isMounted = false;
       unsubscribe();
     };
   }, [account]);
 
-  // AUTO-SAVE ON EVERY CHANGE (LocalStorage + Firestore)
+  // 3. Auto-save ONLY when user explicitly modified data locally
   useEffect(() => {
     const storageKey = getStorageKey(account?.userId);
     try {
@@ -119,7 +154,15 @@ export default function App() {
       console.error('Failed to save data to localStorage', e);
     }
 
-    if (!account || isReceivingCloudDataRef.current) return;
+    // Safety guard: Do NOT save to cloud if not logged in, not initialized, or if receiving incoming cloud data
+    if (
+      !account ||
+      !isInitializedFromCloudRef.current ||
+      !isLocallyModifiedRef.current ||
+      isReceivingCloudDataRef.current
+    ) {
+      return;
+    }
 
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -133,12 +176,14 @@ export default function App() {
           yearsData,
           account.displayName
         );
+        isLocallyModifiedRef.current = false;
         setSyncStatus('synced');
+        setLastSyncedAt(new Date().toLocaleTimeString());
       } catch (err) {
         console.error('Cloud auto-save error:', err);
         setSyncStatus('offline');
       }
-    }, 400);
+    }, 500);
 
     return () => {
       if (saveTimeoutRef.current) {
@@ -147,7 +192,39 @@ export default function App() {
     };
   }, [yearsData, account]);
 
-  // Force manual cloud save
+  // Manual: Force reload latest from cloud
+  const handleReloadFromCloud = async () => {
+    if (!account) {
+      setIsAuthOpen(true);
+      return;
+    }
+    setSyncStatus('syncing');
+    try {
+      const cloudResult = await loadPortfolioFromCloud(account.userId);
+      if (cloudResult && cloudResult.yearsData && cloudResult.yearsData.length > 0) {
+        isReceivingCloudDataRef.current = true;
+        setYearsData(cloudResult.yearsData);
+        const storageKey = getStorageKey(account.userId);
+        localStorage.setItem(storageKey, JSON.stringify(cloudResult.yearsData));
+        isLocallyModifiedRef.current = false;
+        setLastSyncedAt(new Date().toLocaleTimeString());
+        setSyncStatus('synced');
+        showToast('Cartera recargada y actualizada desde la nube');
+        setTimeout(() => {
+          isReceivingCloudDataRef.current = false;
+        }, 300);
+      } else {
+        setSyncStatus('synced');
+        showToast('No hay datos más recientes en la nube');
+      }
+    } catch (err) {
+      console.error(err);
+      setSyncStatus('offline');
+      showToast('Error al conectar con la base de datos');
+    }
+  };
+
+  // Manual: Force upload to cloud
   const handleForceSaveCloud = async () => {
     if (!account) {
       setIsAuthOpen(true);
@@ -160,8 +237,10 @@ export default function App() {
         yearsData,
         account.displayName
       );
+      isLocallyModifiedRef.current = false;
       setSyncStatus('synced');
-      showToast('Cartera sincronizada con la nube con éxito');
+      setLastSyncedAt(new Date().toLocaleTimeString());
+      showToast('Cartera guardada y sincronizada en la nube');
     } catch (err) {
       console.error(err);
       setSyncStatus('offline');
@@ -169,11 +248,13 @@ export default function App() {
     }
   };
 
-  // Handle Logout / Disconnect Cloud
+  // Handle Logout
   const handleLogout = () => {
     clearStoredUserSession();
     setAccount(null);
     setSyncStatus('local');
+    isInitializedFromCloudRef.current = false;
+    isLocallyModifiedRef.current = false;
 
     const guestKey = getStorageKey();
     const savedGuest = localStorage.getItem(guestKey);
@@ -195,15 +276,19 @@ export default function App() {
   // Success handler from AuthModal
   const handleAuthSuccess = (connectedAccount: UserAccount, loadedData?: YearData[]) => {
     setAccount(connectedAccount);
+    isInitializedFromCloudRef.current = true;
+    isLocallyModifiedRef.current = false;
     if (loadedData && loadedData.length > 0) {
       setYearsData(loadedData);
       const maxYear = Math.max(...loadedData.map((y) => y.year));
       setSelectedYear(maxYear);
     }
+    setLastSyncedAt(new Date().toLocaleTimeString());
+    setSyncStatus('synced');
     showToast(`Bienvenido ${connectedAccount.displayName}, datos sincronizados`);
   };
 
-  // Update month data
+  // User Action: Update month data
   const handleUpdateMonthData = (
     year: number,
     month: number,
@@ -212,6 +297,7 @@ export default function App() {
     notes?: string,
     isClosed?: boolean
   ) => {
+    isLocallyModifiedRef.current = true;
     setYearsData((prev) =>
       prev.map((y) => {
         if (y.year !== year) return y;
@@ -231,8 +317,9 @@ export default function App() {
     );
   };
 
-  // Toggle month status (Closed vs In-Course)
+  // User Action: Toggle month status (Closed vs In-Course)
   const handleToggleMonthStatus = (year: number, month: number, newClosedStatus: boolean) => {
+    isLocallyModifiedRef.current = true;
     setYearsData((prev) =>
       prev.map((y) => {
         if (y.year !== year) return y;
@@ -244,8 +331,9 @@ export default function App() {
     );
   };
 
-  // Add next year
+  // User Action: Add next year
   const handleAddNewYear = () => {
+    isLocallyModifiedRef.current = true;
     const maxYear = Math.max(...yearsData.map((y) => y.year));
     const newYearNumber = maxYear + 1;
 
@@ -267,12 +355,13 @@ export default function App() {
     showToast(`Año ${newYearNumber} añadido`);
   };
 
-  // Rollover positions from source month to next month
+  // User Action: Rollover positions from source month to next month
   const handleRolloverToNextMonth = (
     sourceYear: number,
     sourceMonth: number,
     rolloverMode: 'use_valuation' | 'keep_invested'
   ) => {
+    isLocallyModifiedRef.current = true;
     let targetYear = sourceYear;
     let targetMonth = sourceMonth + 1;
     if (targetMonth > 12) {
@@ -352,6 +441,7 @@ export default function App() {
   };
 
   const handleResetData = () => {
+    isLocallyModifiedRef.current = true;
     const key = getStorageKey(account?.userId);
     localStorage.removeItem(key);
     setYearsData(INITIAL_YEARS_DATA);
@@ -361,6 +451,7 @@ export default function App() {
   };
 
   const handleImportData = (imported: YearData[]) => {
+    isLocallyModifiedRef.current = true;
     setYearsData(imported);
     if (imported.length > 0) {
       setSelectedYear(imported[imported.length - 1].year);
@@ -387,9 +478,11 @@ export default function App() {
         onImportData={handleImportData}
         account={account}
         syncStatus={syncStatus}
+        lastSyncedAt={lastSyncedAt}
         onOpenAuth={() => setIsAuthOpen(true)}
         onLogout={handleLogout}
         onForceSaveCloud={handleForceSaveCloud}
+        onReloadFromCloud={handleReloadFromCloud}
         onShowToast={showToast}
       />
 
